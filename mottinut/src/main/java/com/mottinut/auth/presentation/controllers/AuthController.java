@@ -1,15 +1,14 @@
 package com.mottinut.auth.presentation.controllers;
 
+import com.mottinut.auth.domain.entities.Nutritionist;
+import com.mottinut.auth.domain.entities.Patient;
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.AuthService;
 import com.mottinut.auth.domain.services.UserService;
 import com.mottinut.auth.domain.valueobjects.Role;
 import com.mottinut.auth.infrastructure.security.CustomUserPrincipal;
 import com.mottinut.auth.infrastructure.security.JwtTokenProvider;
-import com.mottinut.auth.presentation.dto.LoginRequest;
-import com.mottinut.auth.presentation.dto.LoginResponse;
-import com.mottinut.auth.presentation.dto.RegisterRequest;
-import com.mottinut.auth.presentation.dto.UserResponse;
+import com.mottinut.auth.presentation.dto.*;
 import com.mottinut.shared.domain.valueobjects.Email;
 import com.mottinut.shared.presentation.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -37,12 +36,11 @@ public class AuthController {
         this.tokenProvider = tokenProvider;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<LoginResponse>> register(@Valid @RequestBody RegisterRequest request) {
-        User user = authService.register(
+    @PostMapping("/register/patient")
+    public ResponseEntity<ApiResponse<LoginResponse>> registerPatient(@Valid @RequestBody RegisterPatientRequest request) {
+        Patient patient = authService.registerPatient(
                 new Email(request.getEmail()),
                 request.getPassword(),
-                Role.fromString(request.getRole()),
                 request.getFirstName(),
                 request.getLastName(),
                 request.getBirthDate(),
@@ -55,17 +53,44 @@ public class AuthController {
                 request.getDietaryPreferences()
         );
 
-        var token = tokenProvider.generateToken(user.getUserId(), user.getRole());
+        var token = tokenProvider.generateToken(patient.getUserId(), patient.getRole());
 
         LoginResponse response = new LoginResponse(
                 token.getValue(),
-                user.getUserId().getValue(),
-                user.getRole().getValue(),
-                user.getFullName()
+                patient.getUserId().getValue(),
+                patient.getRole().getValue(),
+                patient.getFullName()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>("Usuario registrado exitosamente", response));
+                .body(new ApiResponse<>("Paciente registrado exitosamente", response));
+    }
+
+    @PostMapping("/register/nutritionist")
+    public ResponseEntity<ApiResponse<LoginResponse>> registerNutritionist(@Valid @RequestBody RegisterNutritionistRequest request) {
+        Nutritionist nutritionist = authService.registerNutritionist(
+                new Email(request.getEmail()),
+                request.getPassword(),
+                request.getFirstName(),
+                request.getLastName(),
+                request.getBirthDate(),
+                request.getPhone(),
+                request.getLicenseNumber(),
+                request.getSpecialization(),
+                request.getWorkplace()
+        );
+
+        var token = tokenProvider.generateToken(nutritionist.getUserId(), nutritionist.getRole());
+
+        LoginResponse response = new LoginResponse(
+                token.getValue(),
+                nutritionist.getUserId().getValue(),
+                nutritionist.getRole().getValue(),
+                nutritionist.getFullName()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>("Nutricionista registrado exitosamente", response));
     }
 
     @PostMapping("/login")
@@ -88,33 +113,18 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<UserResponse>> getProfile(@AuthenticationPrincipal CustomUserPrincipal principal) {
+    public ResponseEntity<ApiResponse<Object>> getProfile(@AuthenticationPrincipal CustomUserPrincipal principal) {
         User user = principal.getUser();
-        UserResponse response = UserResponse.fromUser(user);
+
+        Object response;
+        if (user instanceof Patient) {
+            response = PatientResponse.fromPatient((Patient) user);
+        } else if (user instanceof Nutritionist) {
+            response = NutritionistResponse.fromNutritionist((Nutritionist) user);
+        } else {
+            throw new IllegalStateException("Tipo de usuario no soportado");
+        }
+
         return ResponseEntity.ok(new ApiResponse<>("Perfil obtenido exitosamente", response));
-    }
-
-    @GetMapping("/verify-token")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> verifyToken(@AuthenticationPrincipal CustomUserPrincipal principal) {
-        User user = principal.getUser();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("valid", true);
-        response.put("user_id", user.getUserId().getValue());
-        response.put("role", user.getRole().getValue());
-        response.put("email", user.getEmail().getValue());
-
-        return ResponseEntity.ok(new ApiResponse<>("Token válido", response));
-    }
-
-    @GetMapping("/health")
-    public ResponseEntity<Map<String, Object>> healthCheck() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "ok");
-        response.put("message", "API Auth funcionando correctamente");
-        response.put("version", "1.0.0");
-        response.put("timestamp", LocalDateTime.now().toString());
-
-        return ResponseEntity.ok(response);
     }
 }

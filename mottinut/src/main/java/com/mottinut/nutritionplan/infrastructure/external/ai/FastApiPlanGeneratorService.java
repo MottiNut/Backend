@@ -1,8 +1,10 @@
 package com.mottinut.nutritionplan.infrastructure.external.ai;
 
+import com.mottinut.auth.domain.entities.Patient;
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.UserService;
 import com.mottinut.nutritionplan.domain.services.AiPlanGeneratorService;
+import com.mottinut.shared.domain.exceptions.NotFoundException;
 import com.mottinut.shared.domain.valueobjects.UserId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -39,15 +41,12 @@ public class FastApiPlanGeneratorService implements AiPlanGeneratorService {
     public String generatePlan(UserId patientId, LocalDate weekStartDate, Integer energyRequirement,
                                String goal, String specialRequirements) {
         try {
-            // Get patient info
-            System.out.println("ESTOY AQUI MIRAMEEEEEEEEEEEEEE 1:");
-            User patient = userService.getUserById(patientId);
-            System.out.println("ESTOY AQUI MIRAMEEEEEEEEEEEEEE 2:");
-
+            // Get patient info - CAMBIO PRINCIPAL: usar getPatientById en lugar de getUserById
+            Patient patient = userService.getPatientById(patientId); // ← CAMBIO AQUÍ
             // Prepare patient info map - usando HashMap para permitir nulls
             Map<String, Object> patientInfo = new HashMap<>();
             patientInfo.put("age", calculateAge(patient.getBirthDate()));
-            patientInfo.put("height", patient.getHeight());
+            patientInfo.put("height", patient.getHeight()); // ← CORREGIDO: getHeight() en lugar de getHeigh()
             patientInfo.put("weight", patient.getWeight());
             patientInfo.put("has_medical_condition", patient.hasMedicalCondition());
             patientInfo.put("chronic_disease", patient.getChronicDisease() != null ? patient.getChronicDisease() : "");
@@ -86,6 +85,10 @@ public class FastApiPlanGeneratorService implements AiPlanGeneratorService {
         } catch (HttpServerErrorException e) {
             logger.error("Error del servidor FastAPI: {}", e.getResponseBodyAsString());
             throw new RuntimeException("Error interno del servicio de IA");
+        } catch (NotFoundException e) {
+            // ← NUEVO: Manejo específico para cuando no se encuentra el paciente
+            logger.error("Paciente no encontrado con ID: {}", patientId.getValue());
+            throw new RuntimeException("Paciente no encontrado");
         } catch (Exception e) {
             logger.error("Error inesperado: ", e);
             throw new RuntimeException("Error generando plan nutricional: " + e.getMessage());

@@ -1,5 +1,7 @@
 package com.mottinut.auth.domain.services;
 
+import com.mottinut.auth.domain.entities.Nutritionist;
+import com.mottinut.auth.domain.entities.Patient;
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.repositories.UserRepository;
 import com.mottinut.shared.domain.exceptions.NotFoundException;
@@ -19,13 +21,32 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
     }
 
-    public User updateUserProfile(UserId userId, String firstName, String lastName,
-                                  String phone, Double height, Double weight,
-                                  boolean hasMedicalCondition, String chronicDisease,
-                                  String allergies, String dietaryPreferences) {
-        User user = getUserById(userId);
-        user.updateProfile(firstName, lastName, phone, height, weight,
-                hasMedicalCondition, chronicDisease, allergies, dietaryPreferences);
-        return userRepository.save(user);
+    public Patient getPatientById(UserId userId) {
+        return userRepository.findPatientById(userId)
+                .orElseThrow(() -> new NotFoundException("Paciente no encontrado"));
+    }
+
+    public Nutritionist getNutritionistById(UserId userId) {
+        return userRepository.findNutritionistById(userId)
+                .orElseThrow(() -> new NotFoundException("Nutricionista no encontrado"));
+    }
+
+    public Patient updatePatientProfile(UserId userId, String firstName, String lastName, String phone,
+                                        Double height, Double weight, boolean hasMedicalCondition,
+                                        String chronicDisease, String allergies, String dietaryPreferences,
+                                        String emergencyContact) {
+        Patient patient = getPatientById(userId);
+        patient.updateBasicProfile(firstName, lastName, phone);
+        patient.updateMedicalProfile(height, weight, hasMedicalCondition, chronicDisease,
+                allergies, dietaryPreferences, emergencyContact);
+        return (Patient) userRepository.save(patient);
+    }
+
+    public Nutritionist updateNutritionistProfile(UserId userId, String firstName, String lastName,
+                                                  String phone, Integer yearsOfExperience, String biography) {
+        Nutritionist nutritionist = getNutritionistById(userId);
+        nutritionist.updateBasicProfile(firstName, lastName, phone);
+        nutritionist.updateProfessionalProfile(yearsOfExperience, biography);
+        return (Nutritionist) userRepository.save(nutritionist);
     }
 }

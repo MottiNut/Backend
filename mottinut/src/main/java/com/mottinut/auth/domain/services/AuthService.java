@@ -1,6 +1,9 @@
 package com.mottinut.auth.domain.services;
 
+import com.mottinut.auth.domain.entities.Nutritionist;
+import com.mottinut.auth.domain.entities.Patient;
 import com.mottinut.auth.domain.entities.User;
+import com.mottinut.auth.domain.factory.UserFactory;
 import com.mottinut.auth.domain.repositories.UserRepository;
 import com.mottinut.auth.domain.valueobjects.Password;
 import com.mottinut.auth.domain.valueobjects.Role;
@@ -18,15 +21,17 @@ import java.util.Optional;
 @Service
 public class AuthService {
     private final UserRepository userRepository;
+    private final UserFactory userFactory;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, UserFactory userFactory) {
         this.userRepository = userRepository;
+        this.userFactory = userFactory;
     }
 
-    public User register(Email email, String plainPassword, Role role, String firstName,
-                         String lastName, LocalDate birthDate, String phone, Double height,
-                         Double weight, boolean hasMedicalCondition, String chronicDisease,
-                         String allergies, String dietaryPreferences) {
+    public Patient registerPatient(Email email, String plainPassword, String firstName,
+                                   String lastName, LocalDate birthDate, String phone,
+                                   Double height, Double weight, boolean hasMedicalCondition,
+                                   String chronicDisease, String allergies, String dietaryPreferences) {
 
         if (userRepository.existsByEmail(email)) {
             throw new ValidationException("El email ya existe");
@@ -34,25 +39,30 @@ public class AuthService {
 
         Password password = Password.fromPlainText(plainPassword);
 
-        // No generar ID aquí, dejar que JPA lo haga automáticamente
-        User user = new User(
-                null, // UserId será generado por la base de datos
-                email,
-                password,
-                role,
-                firstName,
-                lastName,
-                birthDate,
-                phone,
-                height,
-                weight,
-                hasMedicalCondition,
-                chronicDisease,
-                allergies,
-                dietaryPreferences
+        Patient patient = userFactory.createPatient(
+                null, email, password, firstName, lastName, birthDate, phone,
+                height, weight, hasMedicalCondition, chronicDisease, allergies, dietaryPreferences
         );
 
-        return userRepository.save(user);
+        return (Patient) userRepository.save(patient);
+    }
+
+    public Nutritionist registerNutritionist(Email email, String plainPassword, String firstName,
+                                             String lastName, LocalDate birthDate, String phone,
+                                             String licenseNumber, String specialization, String workplace) {
+
+        if (userRepository.existsByEmail(email)) {
+            throw new ValidationException("El email ya existe");
+        }
+
+        Password password = Password.fromPlainText(plainPassword);
+
+        Nutritionist nutritionist = userFactory.createNutritionist(
+                null, email, password, firstName, lastName, birthDate, phone,
+                licenseNumber, specialization, workplace
+        );
+
+        return (Nutritionist) userRepository.save(nutritionist);
     }
 
     public User authenticate(Email email, String plainPassword) {

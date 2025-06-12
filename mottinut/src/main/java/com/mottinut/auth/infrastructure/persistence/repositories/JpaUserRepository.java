@@ -1,7 +1,11 @@
 package com.mottinut.auth.infrastructure.persistence.repositories;
 
+import com.mottinut.auth.domain.entities.Nutritionist;
+import com.mottinut.auth.domain.entities.Patient;
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.repositories.UserRepository;
+import com.mottinut.auth.infrastructure.persistence.entities.NutritionistEntity;
+import com.mottinut.auth.infrastructure.persistence.entities.PatientEntity;
 import com.mottinut.auth.infrastructure.persistence.entities.UserEntity;
 import com.mottinut.auth.infrastructure.persistence.mappers.UserMapper;
 import com.mottinut.shared.domain.valueobjects.Email;
@@ -11,46 +15,57 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-interface SpringUserRepository extends JpaRepository<UserEntity, Long> {
-    Optional<UserEntity> findByEmail(String email);
-    boolean existsByEmail(String email);
-}
 @Repository
 public class JpaUserRepository implements UserRepository {
-    private final SpringUserRepository springRepository;
+
+    private final UserJpaRepository userJpaRepository;
     private final UserMapper userMapper;
 
-    public JpaUserRepository(SpringUserRepository springRepository, UserMapper userMapper) {
-        this.springRepository = springRepository;
+    public JpaUserRepository(UserJpaRepository userJpaRepository, UserMapper userMapper) {
+        this.userJpaRepository = userJpaRepository;
         this.userMapper = userMapper;
     }
 
     @Override
     public User save(User user) {
         UserEntity entity = userMapper.toEntity(user);
-        UserEntity saved = springRepository.save(entity);
-        return userMapper.toDomain(saved);
+        UserEntity savedEntity = userJpaRepository.save(entity);
+        return userMapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<User> findById(UserId userId) {
-        return springRepository.findById(userId.getValue())
+        return userJpaRepository.findById(userId.getValue())
                 .map(userMapper::toDomain);
     }
 
     @Override
     public Optional<User> findByEmail(Email email) {
-        return springRepository.findByEmail(email.getValue())
+        return userJpaRepository.findByEmail(email.getValue())
                 .map(userMapper::toDomain);
     }
 
     @Override
+    public Optional<Patient> findPatientById(UserId userId) {
+        return userJpaRepository.findById(userId.getValue())
+                .filter(entity -> entity instanceof PatientEntity)
+                .map(entity -> (Patient) userMapper.toDomain(entity));
+    }
+
+    @Override
+    public Optional<Nutritionist> findNutritionistById(UserId userId) {
+        return userJpaRepository.findById(userId.getValue())
+                .filter(entity -> entity instanceof NutritionistEntity)
+                .map(entity -> (Nutritionist) userMapper.toDomain(entity));
+    }
+
+    @Override
     public boolean existsByEmail(Email email) {
-        return springRepository.existsByEmail(email.getValue());
+        return userJpaRepository.existsByEmail(email.getValue());
     }
 
     @Override
     public void deleteById(UserId userId) {
-        springRepository.deleteById(userId.getValue());
+        userJpaRepository.deleteById(userId.getValue());
     }
 }
