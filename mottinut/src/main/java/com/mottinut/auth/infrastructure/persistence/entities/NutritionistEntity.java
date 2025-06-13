@@ -1,21 +1,24 @@
 package com.mottinut.auth.infrastructure.persistence.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import com.mottinut.auth.domain.valueobjects.Role;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@DiscriminatorValue("NUTRITIONIST")
+@Table(name = "nutritionists")
+@PrimaryKeyJoinColumn(name = "user_id") // Clave foránea hacia users
 public class NutritionistEntity extends UserEntity {
-    @Column(name = "license_number")
+
+    @Column(name = "license_number", nullable = false)
     private String licenseNumber;
 
+    @Column(nullable = false)
     private String specialization;
 
+    @Column(nullable = false)
     private String workplace;
 
     @Column(name = "years_of_experience")
@@ -23,4 +26,9 @@ public class NutritionistEntity extends UserEntity {
 
     private String biography;
 
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        setUserType(Role.NUTRITIONIST);
+    }
 }
