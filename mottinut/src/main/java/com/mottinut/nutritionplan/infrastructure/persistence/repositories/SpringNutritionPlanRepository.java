@@ -9,14 +9,24 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-interface SpringNutritionPlanRepository extends JpaRepository<NutritionPlanEntity, Long> {
-    @Query("SELECT p FROM NutritionPlanEntity p WHERE p.status = 'pending_review' ORDER BY p.createdAt ASC")
+public interface SpringNutritionPlanRepository extends JpaRepository<NutritionPlanEntity, Long> {
+
+    @Query("SELECT n FROM NutritionPlanEntity n WHERE n.status = 'pending_review' ORDER BY n.createdAt DESC")
     List<NutritionPlanEntity> findPendingPlans();
 
-    @Query("SELECT p FROM NutritionPlanEntity p WHERE p.patientId = :patientId AND p.weekStartDate = :weekStartDate AND p.status = 'approved'")
-    Optional<NutritionPlanEntity> findApprovedByPatientAndWeek(@Param("patientId") Long patientId,
-                                                               @Param("weekStartDate") LocalDate weekStartDate);
+    @Query("SELECT n FROM NutritionPlanEntity n WHERE n.patientId = :patientId AND n.status = 'pending_patient_acceptance' ORDER BY n.reviewedAt DESC")
+    List<NutritionPlanEntity> findPendingPatientAcceptance(@Param("patientId") Long patientId);
 
-    @Query("SELECT p FROM NutritionPlanEntity p WHERE p.patientId = :patientId AND p.status = 'approved' ORDER BY p.weekStartDate DESC")
-    List<NutritionPlanEntity> findApprovedByPatient(@Param("patientId") Long patientId);
+    @Query("SELECT n FROM NutritionPlanEntity n WHERE n.patientId = :patientId AND n.status = 'accepted_by_patient' " +
+            "AND n.weekStartDate BETWEEN :weekStart AND :weekEnd ORDER BY n.weekStartDate DESC")
+    Optional<NutritionPlanEntity> findAcceptedByPatientAndWeekRange(
+            @Param("patientId") Long patientId,
+            @Param("weekStart") LocalDate weekStart,
+            @Param("weekEnd") LocalDate weekEnd);
+
+    @Query("SELECT n FROM NutritionPlanEntity n WHERE n.patientId = :patientId AND n.status = 'accepted_by_patient' ORDER BY n.weekStartDate DESC")
+    List<NutritionPlanEntity> findAcceptedByPatient(@Param("patientId") Long patientId);
+
+    @Query("SELECT n FROM NutritionPlanEntity n WHERE n.nutritionistId = :nutritionistId AND n.status = 'rejected_by_patient' ORDER BY n.patientResponseAt DESC")
+    List<NutritionPlanEntity> findRejectedByPatient(@Param("nutritionistId") Long nutritionistId);
 }

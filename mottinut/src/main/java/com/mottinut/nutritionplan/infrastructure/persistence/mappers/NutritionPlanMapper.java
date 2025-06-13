@@ -26,8 +26,10 @@ public class NutritionPlanMapper {
         entity.setPlanContent(plan.getPlanContent());
         entity.setStatus(plan.getStatus().getValue());
         entity.setReviewNotes(plan.getReviewNotes());
+        entity.setPatientFeedback(plan.getPatientFeedback());
         entity.setCreatedAt(plan.getCreatedAt());
         entity.setReviewedAt(plan.getReviewedAt());
+        entity.setPatientResponseAt(plan.getPatientResponseAt());
         return entity;
     }
 
@@ -43,7 +45,6 @@ public class NutritionPlanMapper {
                 entity.getPlanContent()
         );
 
-        // Set status and review info using reflection or create additional constructor
         try {
             Field statusField = NutritionPlan.class.getDeclaredField("status");
             statusField.setAccessible(true);
@@ -53,9 +54,17 @@ public class NutritionPlanMapper {
             reviewNotesField.setAccessible(true);
             reviewNotesField.set(plan, entity.getReviewNotes());
 
+            Field patientFeedbackField = NutritionPlan.class.getDeclaredField("patientFeedback");
+            patientFeedbackField.setAccessible(true);
+            patientFeedbackField.set(plan, entity.getPatientFeedback());
+
             Field reviewedAtField = NutritionPlan.class.getDeclaredField("reviewedAt");
             reviewedAtField.setAccessible(true);
             reviewedAtField.set(plan, entity.getReviewedAt());
+
+            Field patientResponseAtField = NutritionPlan.class.getDeclaredField("patientResponseAt");
+            patientResponseAtField.setAccessible(true);
+            patientResponseAtField.set(plan, entity.getPatientResponseAt());
 
         } catch (Exception e) {
             throw new RuntimeException("Error mapping entity to domain", e);

@@ -17,11 +17,13 @@ public class NutritionPlan {
     private final Integer energyRequirement;
     private final String goal;
     private final String specialRequirements;
-    private final String planContent; // JSON con el plan completo
+    private String planContent; // Cambiar a no final para permitir edición
     private PlanStatus status;
     private String reviewNotes;
+    private String patientFeedback; // Nuevo campo
     private final LocalDateTime createdAt;
     private LocalDateTime reviewedAt;
+    private LocalDateTime patientResponseAt; // Nuevo campo
 
     public NutritionPlan(NutritionPlanId planId, UserId patientId, UserId nutritionistId,
                          LocalDate weekStartDate, Integer energyRequirement, String goal,
@@ -39,7 +41,7 @@ public class NutritionPlan {
     }
 
     public void approve(String reviewNotes) {
-        this.status = PlanStatus.APPROVED;
+        this.status = PlanStatus.PENDING_PATIENT_ACCEPTANCE;
         this.reviewNotes = reviewNotes;
         this.reviewedAt = LocalDateTime.now();
     }
@@ -50,11 +52,47 @@ public class NutritionPlan {
         this.reviewedAt = LocalDateTime.now();
     }
 
+    public void editPlan(String newPlanContent, String reviewNotes) {
+        this.planContent = newPlanContent;
+        this.status = PlanStatus.PENDING_PATIENT_ACCEPTANCE;
+        this.reviewNotes = reviewNotes;
+        this.reviewedAt = LocalDateTime.now();
+    }
+
+    public void acceptByPatient(String patientFeedback) {
+        this.status = PlanStatus.ACCEPTED_BY_PATIENT;
+        this.patientFeedback = patientFeedback;
+        this.patientResponseAt = LocalDateTime.now();
+    }
+
+    public void rejectByPatient(String patientFeedback) {
+        this.status = PlanStatus.REJECTED_BY_PATIENT;
+        this.patientFeedback = patientFeedback;
+        this.patientResponseAt = LocalDateTime.now();
+    }
+
+    // Métodos de estado
     public boolean isPending() {
         return status == PlanStatus.PENDING_REVIEW;
     }
 
+    public boolean isPendingPatientAcceptance() {
+        return status == PlanStatus.PENDING_PATIENT_ACCEPTANCE;
+    }
+
     public boolean isApproved() {
         return status == PlanStatus.APPROVED;
+    }
+
+    public boolean isAcceptedByPatient() {
+        return status == PlanStatus.ACCEPTED_BY_PATIENT;
+    }
+
+    public boolean isRejectedByPatient() {
+        return status == PlanStatus.REJECTED_BY_PATIENT;
+    }
+
+    public boolean canBeEditedByNutritionist() {
+        return status == PlanStatus.REJECTED || status == PlanStatus.REJECTED_BY_PATIENT;
     }
 }

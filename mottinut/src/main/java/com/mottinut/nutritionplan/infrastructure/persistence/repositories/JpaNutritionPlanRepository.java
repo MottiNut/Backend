@@ -45,14 +45,28 @@ public class JpaNutritionPlanRepository implements NutritionPlanRepository {
     }
 
     @Override
-    public Optional<NutritionPlan> findApprovedPlanByPatientAndWeek(UserId patientId, LocalDate weekStartDate) {
-        return springRepository.findApprovedByPatientAndWeek(patientId.getValue(), weekStartDate)
+    public List<NutritionPlan> findPendingPatientAcceptancePlans(UserId patientId) {
+        return springRepository.findPendingPatientAcceptance(patientId.getValue()).stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<NutritionPlan> findAcceptedPlanByPatientAndWeekRange(UserId patientId, LocalDate startDate, LocalDate endDate) {
+        return springRepository.findAcceptedByPatientAndWeekRange(patientId.getValue(), startDate, endDate)
                 .map(mapper::toDomain);
     }
 
     @Override
-    public List<NutritionPlan> findApprovedPlansByPatient(UserId patientId) {
-        return springRepository.findApprovedByPatient(patientId.getValue()).stream()
+    public List<NutritionPlan> findAcceptedPlansByPatient(UserId patientId) {
+        return springRepository.findAcceptedByPatient(patientId.getValue()).stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NutritionPlan> findRejectedByPatientPlans(UserId nutritionistId) {
+        return springRepository.findRejectedByPatient(nutritionistId.getValue()).stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }

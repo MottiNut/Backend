@@ -12,6 +12,8 @@ public interface NutritionPlanRepository {
     NutritionPlan save(NutritionPlan plan);
     Optional<NutritionPlan> findById(NutritionPlanId planId);
     List<NutritionPlan> findPendingPlans();
-    Optional<NutritionPlan> findApprovedPlanByPatientAndWeek(UserId patientId, LocalDate weekStartDate);
-    List<NutritionPlan> findApprovedPlansByPatient(UserId patientId);
+    List<NutritionPlan> findPendingPatientAcceptancePlans(UserId patientId);
+    Optional<NutritionPlan> findAcceptedPlanByPatientAndWeekRange(UserId patientId, LocalDate startDate, LocalDate endDate);
+    List<NutritionPlan> findAcceptedPlansByPatient(UserId patientId);
+    List<NutritionPlan> findRejectedByPatientPlans(UserId nutritionistId);
 }

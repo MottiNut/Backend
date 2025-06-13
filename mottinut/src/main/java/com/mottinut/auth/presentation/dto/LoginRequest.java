@@ -11,6 +11,8 @@ public class LoginRequest {
     @NotBlank(message = "La contraseña es requerida")
     private String password;
 
+    public LoginRequest() {} // Constructor vacío requerido
+
     public LoginRequest(String email, String password) {
         this.email = email;
         this.password = password;

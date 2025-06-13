@@ -12,5 +12,5 @@ public class DailyPlanResponseDto {
     private String dayName;
     private Map<String, Object> meals; // breakfast, lunch, dinner, snacks
     private Integer totalCalories;
-    private Map<String, Double> macronutrients; // proteins, carbs, fats
+    private Map<String, Number> macronutrients; // proteins, carbs, fats
 }

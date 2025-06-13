@@ -44,14 +44,21 @@ public class NutritionPlanEntity {
     @Column(name = "review_notes", columnDefinition = "TEXT")
     private String reviewNotes;
 
+    @Column(name = "patient_feedback", columnDefinition = "TEXT")
+    private String patientFeedback;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 
+    @Column(name = "patient_response_at")
+    private LocalDateTime patientResponseAt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
 }
+

@@ -2,14 +2,13 @@ package com.mottinut.nutritionplan.domain.enums;
 
 import com.mottinut.shared.domain.exceptions.ValidationException;
 
-public enum ReviewAction {
-    APPROVE("approve"),
-    REJECT("reject"),
-    EDIT("edit");
+public enum PatientAction {
+    ACCEPT("accept"),
+    REJECT("reject");
 
     private final String value;
 
-    ReviewAction(String value) {
+    PatientAction(String value) {
         this.value = value;
     }
 
@@ -17,13 +16,12 @@ public enum ReviewAction {
         return value;
     }
 
-    public static ReviewAction fromString(String value) {
-        for (ReviewAction action : values()) {
+    public static PatientAction fromString(String value) {
+        for (PatientAction action : values()) {
             if (action.value.equals(value)) {
                 return action;
             }
         }
-        throw new ValidationException("Acción de revisión inválida: " + value);
+        throw new ValidationException("Acción del paciente inválida: " + value);
     }
 }
-

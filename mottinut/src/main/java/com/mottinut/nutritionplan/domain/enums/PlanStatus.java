@@ -5,7 +5,10 @@ import com.mottinut.shared.domain.exceptions.ValidationException;
 public enum PlanStatus {
     PENDING_REVIEW("pending_review"),
     APPROVED("approved"),
-    REJECTED("rejected");
+    REJECTED("rejected"),
+    PENDING_PATIENT_ACCEPTANCE("pending_patient_acceptance"),
+    ACCEPTED_BY_PATIENT("accepted_by_patient"),
+    REJECTED_BY_PATIENT("rejected_by_patient");
 
     private final String value;
 

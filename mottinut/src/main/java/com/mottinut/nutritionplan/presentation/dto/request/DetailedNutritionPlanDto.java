@@ -1,11 +1,11 @@
-package com.mottinut.nutritionplan.presentation.dto.response;
+package com.mottinut.nutritionplan.presentation.dto.request;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 @Builder
-public class NutritionPlanResponseDto {
+public class DetailedNutritionPlanDto {
     private Long planId;
     private Long patientId;
     private String patientName;
@@ -15,9 +15,11 @@ public class NutritionPlanResponseDto {
     private Integer energyRequirement;
     private String goal;
     private String specialRequirements;
-    private Object planContent; // Cambio de String a Object
+    private Object planContent; // Será parseado como JSON
     private String status;
     private String reviewNotes;
+    private String patientFeedback;
     private String createdAt;
     private String reviewedAt;
+    private String patientResponseAt;
 }
