@@ -1,5 +1,6 @@
 package com.mottinut.auth.infrastructure.persistence.entities;
 
+import com.mottinut.auth.domain.valueobjects.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,8 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "users")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.JOINED)  // Cambio clave aquí
 public abstract class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,9 +39,14 @@ public abstract class UserEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // Getters y setters...
+    // Campo para identificar el tipo de usuario
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_type", nullable = false)
+    private Role userType;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
 }
+

@@ -79,6 +79,7 @@ public class UserMapper {
         PatientEntity entity = new PatientEntity();
         setCommonFields(entity, patient);
 
+        // Campos específicos del paciente
         entity.setHeight(patient.getHeight());
         entity.setWeight(patient.getWeight());
         entity.setHasMedicalCondition(patient.hasMedicalCondition());
@@ -94,6 +95,7 @@ public class UserMapper {
         NutritionistEntity entity = new NutritionistEntity();
         setCommonFields(entity, nutritionist);
 
+        // Campos específicos del nutricionista
         entity.setLicenseNumber(nutritionist.getLicenseNumber());
         entity.setSpecialization(nutritionist.getSpecialization());
         entity.setWorkplace(nutritionist.getWorkplace());
@@ -104,6 +106,7 @@ public class UserMapper {
     }
 
     private void setCommonFields(UserEntity entity, User user) {
+        // Solo establecer ID si es válido y mayor que 0
         if (user.getUserId() != null && user.getUserId().getValue() != null && user.getUserId().getValue() > 0) {
             entity.setUserId(user.getUserId().getValue());
         }
@@ -114,6 +117,12 @@ public class UserMapper {
         entity.setLastName(user.getLastName());
         entity.setBirthDate(user.getBirthDate());
         entity.setPhone(user.getPhone());
-        entity.setCreatedAt(user.getCreatedAt());
+
+        // Establecer el tipo de usuario basado en la instancia
+        if (user instanceof Patient) {
+            entity.setUserType(Role.PATIENT);
+        } else if (user instanceof Nutritionist) {
+            entity.setUserType(Role.NUTRITIONIST);
+        }
     }
 }

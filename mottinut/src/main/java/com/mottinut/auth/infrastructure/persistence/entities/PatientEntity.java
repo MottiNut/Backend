@@ -1,17 +1,19 @@
 package com.mottinut.auth.infrastructure.persistence.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import com.mottinut.auth.domain.valueobjects.Role;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@DiscriminatorValue("PATIENT")
+@Table(name = "patients")
+@PrimaryKeyJoinColumn(name = "user_id") // Clave foránea hacia users
 public class PatientEntity extends UserEntity {
+
     private Double height;
+
     private Double weight;
 
     @Column(name = "has_medical_condition")
@@ -28,4 +30,9 @@ public class PatientEntity extends UserEntity {
     @Column(name = "emergency_contact")
     private String emergencyContact;
 
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        setUserType(Role.PATIENT);
+    }
 }
