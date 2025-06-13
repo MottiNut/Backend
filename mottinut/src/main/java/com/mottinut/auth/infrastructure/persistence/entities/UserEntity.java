@@ -4,6 +4,7 @@ import com.mottinut.auth.domain.valueobjects.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.usertype.UserType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
