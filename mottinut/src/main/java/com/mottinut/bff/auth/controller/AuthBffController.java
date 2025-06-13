@@ -1,11 +1,11 @@
-package com.mottinut.bff.controller;
+package com.mottinut.bff.auth.controller;
 
-import com.mottinut.bff.dto.auth.request.*;
-import com.mottinut.bff.dto.auth.response.AuthResponse;
-import com.mottinut.bff.dto.auth.response.NutritionistProfileResponse;
-import com.mottinut.bff.dto.auth.response.PatientProfileResponse;
-import com.mottinut.bff.dto.auth.response.UserProfileResponse;
-import com.mottinut.bff.service.AuthBffService;
+import com.mottinut.bff.auth.dto.request.*;
+import com.mottinut.bff.auth.dto.response.AuthResponse;
+import com.mottinut.bff.auth.dto.response.NutritionistProfileResponse;
+import com.mottinut.bff.auth.dto.response.PatientProfileResponse;
+import com.mottinut.bff.auth.dto.response.UserProfileResponse;
+import com.mottinut.bff.auth.service.AuthBffService;
 import com.mottinut.crosscutting.security.CustomUserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

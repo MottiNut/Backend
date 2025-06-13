@@ -1,4 +1,4 @@
-package com.mottinut.bff.dto.auth.response;
+package com.mottinut.bff.auth.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.mottinut.auth.domain.entities.Nutritionist;

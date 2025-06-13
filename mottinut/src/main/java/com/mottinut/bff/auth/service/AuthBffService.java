@@ -1,4 +1,4 @@
-package com.mottinut.bff.service;
+package com.mottinut.bff.auth.service;
 
 import com.mottinut.auth.domain.entities.Nutritionist;
 import com.mottinut.auth.domain.entities.Patient;
@@ -6,11 +6,11 @@ import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.AuthService;
 import com.mottinut.auth.domain.services.UserService;
 import com.mottinut.auth.domain.valueobjects.Token;
-import com.mottinut.bff.dto.auth.request.*;
-import com.mottinut.bff.dto.auth.response.AuthResponse;
-import com.mottinut.bff.dto.auth.response.NutritionistProfileResponse;
-import com.mottinut.bff.dto.auth.response.PatientProfileResponse;
-import com.mottinut.bff.dto.auth.response.UserProfileResponse;
+import com.mottinut.bff.auth.dto.request.*;
+import com.mottinut.bff.auth.dto.response.AuthResponse;
+import com.mottinut.bff.auth.dto.response.NutritionistProfileResponse;
+import com.mottinut.bff.auth.dto.response.PatientProfileResponse;
+import com.mottinut.bff.auth.dto.response.UserProfileResponse;
 import com.mottinut.crosscutting.security.JwtTokenProvider;
 import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.Email;

@@ -1,4 +1,4 @@
-package com.mottinut.bff.dto.auth.request;
+package com.mottinut.bff.auth.dto.request;
 
 public class UpdateNutritionistProfileRequest {
     private String firstName;
