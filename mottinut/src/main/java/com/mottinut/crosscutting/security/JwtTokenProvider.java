@@ -1,4 +1,4 @@
-package com.mottinut.auth.infrastructure.security;
+package com.mottinut.crosscutting.security;
 
 import com.mottinut.auth.domain.valueobjects.Role;
 import com.mottinut.auth.domain.valueobjects.Token;

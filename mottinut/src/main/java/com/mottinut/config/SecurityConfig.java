@@ -1,6 +1,6 @@
 package com.mottinut.config;
 
-import com.mottinut.auth.infrastructure.security.JwtAuthenticationFilter;
+import com.mottinut.crosscutting.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,7 +27,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/auth/register/nutritionist", "/api/auth/register/patient", "/api/auth/login", "/api/auth/health").permitAll()
+                        .requestMatchers("/api/bff/auth/register/patient", "/api/bff/auth/register/nutritionist", "/api/bff/auth/login", "/api/auth/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll() // Para desarrollo con H2
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Para Swagger
                         .anyRequest().authenticated()

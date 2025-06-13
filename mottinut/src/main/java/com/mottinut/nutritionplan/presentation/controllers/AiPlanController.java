@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.UserService;
-import com.mottinut.auth.infrastructure.security.CustomUserPrincipal;
+import com.mottinut.crosscutting.security.CustomUserPrincipal;
 import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
 import com.mottinut.nutritionplan.domain.enums.ReviewAction;
 import com.mottinut.nutritionplan.domain.services.NutritionPlanService;
@@ -22,9 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController

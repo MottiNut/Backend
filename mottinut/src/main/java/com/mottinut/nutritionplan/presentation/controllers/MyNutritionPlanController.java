@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.UserService;
-import com.mottinut.auth.infrastructure.security.CustomUserPrincipal;
+import com.mottinut.crosscutting.security.CustomUserPrincipal;
 import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
 
 import com.mottinut.nutritionplan.domain.enums.PatientAction;
@@ -27,7 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

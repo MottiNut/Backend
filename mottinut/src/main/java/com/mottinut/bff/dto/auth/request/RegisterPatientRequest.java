@@ -1,9 +1,8 @@
-package com.mottinut.auth.presentation.dto;
+package com.mottinut.bff.dto.auth.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.Getter;
 
 import java.time.LocalDate;
 

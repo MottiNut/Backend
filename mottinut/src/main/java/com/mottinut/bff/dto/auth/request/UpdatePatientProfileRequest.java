@@ -1,4 +1,4 @@
-package com.mottinut.auth.presentation.dto;
+package com.mottinut.bff.dto.auth.request;
 
 public class UpdatePatientProfileRequest {
     private String firstName;
