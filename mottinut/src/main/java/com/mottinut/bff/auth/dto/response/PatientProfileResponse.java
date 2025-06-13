@@ -5,6 +5,7 @@ import com.mottinut.auth.domain.entities.Patient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @JsonTypeName("patient")

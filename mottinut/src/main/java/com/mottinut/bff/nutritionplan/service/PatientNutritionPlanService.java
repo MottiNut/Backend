@@ -1,88 +1,76 @@
-package com.mottinut.nutritionplan.presentation.controllers;
+package com.mottinut.bff.nutritionplan.service;
+
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.UserService;
+import com.mottinut.bff.nutritionplan.dto.request.PendingPatientAcceptanceDto;
+import com.mottinut.bff.nutritionplan.dto.response.DailyPlanResponseDto;
+import com.mottinut.bff.nutritionplan.dto.response.NutritionPlanResponseDto;
+import com.mottinut.bff.nutritionplan.dto.response.PatientPlanResponseDto;
+import com.mottinut.bff.nutritionplan.dto.response.WeeklyPlanResponseDto;
 import com.mottinut.crosscutting.security.CustomUserPrincipal;
 import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
-
 import com.mottinut.nutritionplan.domain.enums.PatientAction;
 import com.mottinut.nutritionplan.domain.services.NutritionPlanService;
 import com.mottinut.nutritionplan.domain.valueobjects.NutritionPlanId;
-import com.mottinut.nutritionplan.presentation.dto.request.PendingPatientAcceptanceDto;
-import com.mottinut.nutritionplan.presentation.dto.response.DailyPlanResponseDto;
-import com.mottinut.nutritionplan.presentation.dto.response.NutritionPlanResponseDto;
-import com.mottinut.nutritionplan.presentation.dto.response.PatientPlanResponseDto;
-import com.mottinut.nutritionplan.presentation.dto.response.WeeklyPlanResponseDto;
 import com.mottinut.shared.domain.exceptions.NotFoundException;
 import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.UserId;
-import java.util.Map;
-
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
-@RestController
-@RequestMapping("/api/my-nutrition-plan")
-@PreAuthorize("hasRole('PATIENT')")
-@CrossOrigin(origins = "*")
-public class MyNutritionPlanController {
+@Service
+@Transactional
+public class PatientNutritionPlanService {
 
     private final NutritionPlanService nutritionPlanService;
     private final ObjectMapper objectMapper;
     private final UserService userService;
 
-    public MyNutritionPlanController(NutritionPlanService nutritionPlanService, ObjectMapper objectMapper, UserService userService) {
+    public PatientNutritionPlanService(NutritionPlanService nutritionPlanService,
+                                       ObjectMapper objectMapper,
+                                       UserService userService) {
         this.nutritionPlanService = nutritionPlanService;
         this.objectMapper = objectMapper;
         this.userService = userService;
     }
 
-    // NUEVO: Endpoint para obtener planes pendientes de aceptación por el paciente
-    @GetMapping("/pending-acceptance")
-    public ResponseEntity<List<PendingPatientAcceptanceDto>> getPendingAcceptancePlans(Authentication authentication) {
+    public List<PendingPatientAcceptanceDto> getPendingAcceptancePlans(Authentication authentication) {
         UserId patientId = getCurrentUserId(authentication);
         List<NutritionPlan> pendingPlans = nutritionPlanService.getPendingPatientAcceptancePlans(patientId);
 
-        List<PendingPatientAcceptanceDto> response = pendingPlans.stream()
+        return pendingPlans.stream()
                 .map(this::buildPendingAcceptanceResponse)
                 .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
     }
 
-    // NUEVO: Endpoint para responder (aceptar/rechazar) a un plan
-    @PostMapping("/respond/{planId}")
-    public ResponseEntity<NutritionPlanResponseDto> respondToPlan(
-            @PathVariable Long planId,
-            @Valid @RequestBody PatientPlanResponseDto request,
-            Authentication authentication) {
+    public NutritionPlanResponseDto respondToPlan(Long planId, PatientPlanResponseDto request, Authentication authentication) {
+        try {
+            UserId patientId = getCurrentUserId(authentication);
+            NutritionPlanId nutritionPlanId = new NutritionPlanId(planId);
+            PatientAction action = PatientAction.fromString(request.getAction());
 
-        UserId patientId = getCurrentUserId(authentication);
-        NutritionPlanId nutritionPlanId = new NutritionPlanId(planId);
-        PatientAction action = PatientAction.fromString(request.getAction());
+            NutritionPlan respondedPlan = nutritionPlanService.patientRespondToPlan(
+                    patientId, nutritionPlanId, action, request.getFeedback());
 
-        NutritionPlan respondedPlan = nutritionPlanService.patientRespondToPlan(
-                patientId, nutritionPlanId, action, request.getFeedback());
-
-        NutritionPlanResponseDto response = buildPlanResponse(respondedPlan);
-        return ResponseEntity.ok(response);
+            return buildPlanResponse(respondedPlan);
+        } catch (Exception e) {
+            throw new RuntimeException("Error respondiendo al plan: " + e.getMessage(), e);
+        }
     }
 
-    @GetMapping("/today")
-    public ResponseEntity<DailyPlanResponseDto> getTodayPlan(Authentication authentication) {
+    public DailyPlanResponseDto getTodayPlan(Authentication authentication) {
         UserId patientId = getCurrentUserId(authentication);
         LocalDate today = LocalDate.now();
 
@@ -92,18 +80,11 @@ public class MyNutritionPlanController {
             throw new NotFoundException("No tienes un plan nutricional aprobado para esta fecha");
         }
 
-        int dayNumber = today.getDayOfWeek().getValue(); // 1=Monday, 7=Sunday
-        DailyPlanResponseDto dailyPlan = extractDailyPlan(planOpt.get(), dayNumber, today);
-
-        return ResponseEntity.ok(dailyPlan);
+        int dayNumber = today.getDayOfWeek().getValue();
+        return extractDailyPlan(planOpt.get(), dayNumber, today);
     }
 
-    @GetMapping("/day/{dayNumber}")
-    public ResponseEntity<DailyPlanResponseDto> getDayPlan(
-            @PathVariable Integer dayNumber,
-            @RequestParam(required = false) String date,
-            Authentication authentication) {
-
+    public DailyPlanResponseDto getDayPlan(Integer dayNumber, String date, Authentication authentication) {
         if (dayNumber < 1 || dayNumber > 7) {
             throw new ValidationException("El número de día debe estar entre 1 (lunes) y 7 (domingo)");
         }
@@ -117,20 +98,13 @@ public class MyNutritionPlanController {
             throw new NotFoundException("No tienes un plan nutricional aprobado para esta fecha");
         }
 
-        // Calcular la fecha exacta del día solicitado basado en el plan
         LocalDate planStartDate = planOpt.get().getWeekStartDate();
         LocalDate specificDate = planStartDate.plusDays(dayNumber - 1);
 
-        DailyPlanResponseDto dailyPlan = extractDailyPlan(planOpt.get(), dayNumber, specificDate);
-
-        return ResponseEntity.ok(dailyPlan);
+        return extractDailyPlan(planOpt.get(), dayNumber, specificDate);
     }
 
-    @GetMapping("/weekly")
-    public ResponseEntity<WeeklyPlanResponseDto> getWeeklyPlan(
-            @RequestParam(required = false) String date,
-            Authentication authentication) {
-
+    public WeeklyPlanResponseDto getWeeklyPlan(String date, Authentication authentication) {
         UserId patientId = getCurrentUserId(authentication);
         LocalDate referenceDate = date != null ? LocalDate.parse(date) : LocalDate.now();
 
@@ -140,23 +114,19 @@ public class MyNutritionPlanController {
             throw new NotFoundException("No tienes un plan nutricional aprobado para esta fecha");
         }
 
-        WeeklyPlanResponseDto weeklyPlan = buildWeeklyPlanResponse(planOpt.get());
-        return ResponseEntity.ok(weeklyPlan);
+        return buildWeeklyPlanResponse(planOpt.get());
     }
 
-    // NUEVO: Endpoint para obtener historial de planes aceptados
-    @GetMapping("/history")
-    public ResponseEntity<List<WeeklyPlanResponseDto>> getPlanHistory(Authentication authentication) {
+    public List<WeeklyPlanResponseDto> getPlanHistory(Authentication authentication) {
         UserId patientId = getCurrentUserId(authentication);
         List<NutritionPlan> plans = nutritionPlanService.getPatientPlans(patientId);
 
-        List<WeeklyPlanResponseDto> response = plans.stream()
+        return plans.stream()
                 .map(this::buildWeeklyPlanResponse)
                 .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
     }
 
+    // Helper methods
     private UserId getCurrentUserId(Authentication authentication) {
         CustomUserPrincipal principal = (CustomUserPrincipal) authentication.getPrincipal();
         return principal.getUser().getUserId();
@@ -180,7 +150,6 @@ public class MyNutritionPlanController {
             }
 
             throw new NotFoundException("Plan del día no encontrado");
-
         } catch (Exception e) {
             throw new RuntimeException("Error procesando el plan nutricional: " + e.getMessage());
         }
@@ -221,7 +190,6 @@ public class MyNutritionPlanController {
                     .dailyPlans(dailyPlanList)
                     .reviewNotes(plan.getReviewNotes())
                     .build();
-
         } catch (Exception e) {
             throw new RuntimeException("Error procesando el plan semanal: " + e.getMessage());
         }

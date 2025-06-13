@@ -1,8 +1,8 @@
 package com.mottinut.bff.auth.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.mottinut.auth.domain.entities.Nutritionist;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.EqualsAndHashCode;
 
 @Data

@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 
 @Repository
 public class JpaNutritionPlanRepository implements NutritionPlanRepository {
+
     private final SpringNutritionPlanRepository springRepository;
     private final NutritionPlanMapper mapper;
 
-    public JpaNutritionPlanRepository(SpringNutritionPlanRepository springRepository,
-                                      NutritionPlanMapper mapper) {
+    public JpaNutritionPlanRepository(SpringNutritionPlanRepository springRepository, NutritionPlanMapper mapper) {
         this.springRepository = springRepository;
         this.mapper = mapper;
     }
@@ -27,8 +27,8 @@ public class JpaNutritionPlanRepository implements NutritionPlanRepository {
     @Override
     public NutritionPlan save(NutritionPlan plan) {
         NutritionPlanEntity entity = mapper.toEntity(plan);
-        NutritionPlanEntity saved = springRepository.save(entity);
-        return mapper.toDomain(saved);
+        NutritionPlanEntity savedEntity = springRepository.save(entity);
+        return mapper.toDomain(savedEntity);
     }
 
     @Override
@@ -39,14 +39,25 @@ public class JpaNutritionPlanRepository implements NutritionPlanRepository {
 
     @Override
     public List<NutritionPlan> findPendingPlans() {
-        return springRepository.findPendingPlans().stream()
+        return springRepository.findPendingPlans()
+                .stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    // ✅ Implementar el método nuevo
+    @Override
+    public List<NutritionPlan> findPendingPlansByNutritionist(UserId nutritionistId) {
+        return springRepository.findPendingPlansByNutritionist(nutritionistId.getValue())
+                .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<NutritionPlan> findPendingPatientAcceptancePlans(UserId patientId) {
-        return springRepository.findPendingPatientAcceptance(patientId.getValue()).stream()
+        return springRepository.findPendingPatientAcceptance(patientId.getValue())
+                .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -59,14 +70,16 @@ public class JpaNutritionPlanRepository implements NutritionPlanRepository {
 
     @Override
     public List<NutritionPlan> findAcceptedPlansByPatient(UserId patientId) {
-        return springRepository.findAcceptedByPatient(patientId.getValue()).stream()
+        return springRepository.findAcceptedByPatient(patientId.getValue())
+                .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<NutritionPlan> findRejectedByPatientPlans(UserId nutritionistId) {
-        return springRepository.findRejectedByPatient(nutritionistId.getValue()).stream()
+        return springRepository.findRejectedByPatient(nutritionistId.getValue())
+                .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }

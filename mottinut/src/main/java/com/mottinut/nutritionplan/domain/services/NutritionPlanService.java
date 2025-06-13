@@ -177,4 +177,24 @@ public class NutritionPlanService {
     private LocalDate getWeekStart(LocalDate date) {
         return date.with(DayOfWeek.MONDAY);
     }
+
+    public NutritionPlan getPlanByIdForNutritionist(NutritionPlanId planId, UserId nutritionistId) {
+        NutritionPlan plan = nutritionPlanRepository.findById(planId)
+                .orElseThrow(() -> new NotFoundException("Plan nutricional no encontrado"));
+
+        if (!plan.getNutritionistId().equals(nutritionistId)) {
+            throw new UnauthorizedException("No tienes permisos para acceder a este plan");
+        }
+
+        return plan;
+    }
+
+    // Agregar este método en NutritionPlanService
+    public List<NutritionPlan> getPendingPlansByNutritionist(UserId nutritionistId) {
+        User nutritionist = userService.getUserById(nutritionistId);
+        if (!nutritionist.getRole().isNutritionist()) {
+            throw new UnauthorizedException("Solo nutricionistas pueden ver planes pendientes");
+        }
+        return nutritionPlanRepository.findPendingPlansByNutritionist(nutritionistId);
+    }
 }

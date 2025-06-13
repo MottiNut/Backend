@@ -16,6 +16,7 @@ import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.Email;
 import com.mottinut.shared.domain.valueobjects.UserId;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -55,7 +56,7 @@ public class AuthBffService {
                 request.getPhone(),
                 request.getHeight(),
                 request.getWeight(),
-                request.isHasMedicalCondition(),
+                request.getHasMedicalCondition(),
                 request.getChronicDisease(),
                 request.getAllergies(),
                 request.getDietaryPreferences()
@@ -107,7 +108,7 @@ public class AuthBffService {
         throw new ValidationException("Tipo de usuario no válido");
     }
 
-    public PatientProfileResponse updatePatientProfile(UserId userId, UpdatePatientProfileRequest request) {
+    public PatientProfileResponse updatePatientProfile(UserId userId, @Valid UpdatePatientProfileRequest request) {
         Patient updatedPatient = userService.updatePatientProfile(
                 userId,
                 request.getFirstName(),
@@ -125,7 +126,7 @@ public class AuthBffService {
         return PatientProfileResponse.fromPatient(updatedPatient);
     }
 
-    public NutritionistProfileResponse updateNutritionistProfile(UserId userId, UpdateNutritionistProfileRequest request) {
+    public NutritionistProfileResponse updateNutritionistProfile(UserId userId, @Valid UpdateNutritionistProfileRequest request) {
         Nutritionist updatedNutritionist = userService.updateNutritionistProfile(
                 userId,
                 request.getFirstName(),

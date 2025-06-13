@@ -1,28 +1,42 @@
 package com.mottinut.bff.auth.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegisterNutritionistRequest {
-    @NotBlank
+    @NotBlank(message = "El email es requerido")
+    @Email(message = "Formato de email inválido")
     private String email;
-    @NotBlank
+
+    @NotBlank(message = "La contraseña es requerida")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
-    @NotBlank
+
+    @NotBlank(message = "El nombre es requerido")
     private String firstName;
-    @NotBlank
+
+    @NotBlank(message = "El apellido es requerido")
     private String lastName;
-    @NotNull
+
+    @NotNull(message = "La fecha de nacimiento es requerida")
+    @Past(message = "La fecha de nacimiento debe ser en el pasado")
     private LocalDate birthDate;
+
     private String phone;
-    @NotBlank
+
+    @NotBlank(message = "El número de colegiatura es requerido")
     private String licenseNumber;
-    @NotBlank
+
+    @NotBlank(message = "La especialidad es requerida")
     private String specialization;
-    @NotBlank
+
+    @NotBlank(message = "El lugar de trabajo es requerido")
     private String workplace;
 }

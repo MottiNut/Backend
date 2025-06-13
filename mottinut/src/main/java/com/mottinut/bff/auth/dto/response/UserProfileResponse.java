@@ -1,5 +1,4 @@
 package com.mottinut.bff.auth.dto.response;
-
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;

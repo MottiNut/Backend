@@ -1,4 +1,4 @@
-package com.mottinut.nutritionplan.presentation.dto.response;
+package com.mottinut.bff.nutritionplan.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

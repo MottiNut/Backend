@@ -1,4 +1,4 @@
-package com.mottinut.nutritionplan.presentation.dto.request;
+package com.mottinut.bff.nutritionplan.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 @Data
 @Builder

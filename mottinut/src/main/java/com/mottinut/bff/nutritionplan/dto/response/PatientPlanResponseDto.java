@@ -1,8 +1,7 @@
-package com.mottinut.nutritionplan.presentation.dto.response;
+package com.mottinut.bff.nutritionplan.dto.response;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

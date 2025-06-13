@@ -1,4 +1,4 @@
-package com.mottinut.nutritionplan.presentation.dto.request;
+package com.mottinut.bff.nutritionplan.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

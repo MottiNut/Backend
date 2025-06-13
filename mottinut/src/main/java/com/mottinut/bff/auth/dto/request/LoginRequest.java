@@ -17,3 +17,4 @@ public class LoginRequest {
     @NotBlank(message = "La contraseña es requerida")
     private String password;
 }
+

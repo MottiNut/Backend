@@ -1,4 +1,4 @@
-package com.mottinut.nutritionplan.presentation.dto.request;
+package com.mottinut.bff.nutritionplan.dto.request;
 
 import lombok.Builder;
 import lombok.Data;

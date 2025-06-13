@@ -16,4 +16,6 @@ public interface NutritionPlanRepository {
     Optional<NutritionPlan> findAcceptedPlanByPatientAndWeekRange(UserId patientId, LocalDate startDate, LocalDate endDate);
     List<NutritionPlan> findAcceptedPlansByPatient(UserId patientId);
     List<NutritionPlan> findRejectedByPatientPlans(UserId nutritionistId);
+    // ✅ Agregar este método nuevo
+    List<NutritionPlan> findPendingPlansByNutritionist(UserId nutritionistId);
 }
