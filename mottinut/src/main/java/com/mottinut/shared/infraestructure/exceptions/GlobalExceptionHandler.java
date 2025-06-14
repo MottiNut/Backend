@@ -2,6 +2,7 @@ package com.mottinut.shared.infraestructure.exceptions;
 
 import com.mottinut.shared.domain.exceptions.BusinessException;
 import com.mottinut.shared.domain.exceptions.NotFoundException;
+import com.mottinut.shared.domain.exceptions.UnauthorizedException;
 import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.presentation.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,17 @@ public class GlobalExceptionHandler {
                 request.getDescription(false).replace("uri=", "")
         );
         return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.FORBIDDEN.value(),
+                request.getDescription(false).replace("uri=", "")
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     @ExceptionHandler(NotFoundException.class)
