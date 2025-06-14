@@ -1,9 +1,15 @@
 package com.mottinut.shared.presentation.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Setter
+@Getter
 public class ErrorResponse {
+    // Getters and Setters
     private String message;
     private List<String> errors;
     private int status;
@@ -29,20 +35,5 @@ public class ErrorResponse {
         this.path = path;
     }
 
-    // Getters and Setters
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-
-    public List<String> getErrors() { return errors; }
-    public void setErrors(List<String> errors) { this.errors = errors; }
-
-    public int getStatus() { return status; }
-    public void setStatus(int status) { this.status = status; }
-
-    public String getPath() { return path; }
-    public void setPath(String path) { this.path = path; }
-
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }
 
