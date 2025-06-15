@@ -1,5 +1,6 @@
 package com.mottinut.patient.domain.services;
 
+import com.mottinut.auth.domain.services.UserService;
 import com.mottinut.patient.domain.entity.MedicalHistory;
 import com.mottinut.patient.domain.entity.PatientProfile;
 import com.mottinut.patient.domain.entity.PatientWithHistory;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class PatientManagementService {
     private final PatientProfileRepository patientRepository;
     private final MedicalHistoryRepository medicalHistoryRepository;
+    private final UserService userService;
 
     public List<PatientProfile> getAllPatients() {
         return patientRepository.findAll();

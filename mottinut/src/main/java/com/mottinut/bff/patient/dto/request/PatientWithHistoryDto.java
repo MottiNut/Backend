@@ -1,4 +1,4 @@
-package com.mottinut.patient.presentation.dto;
+package com.mottinut.bff.patient.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

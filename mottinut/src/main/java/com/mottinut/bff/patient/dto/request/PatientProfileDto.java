@@ -1,4 +1,4 @@
-package com.mottinut.patient.presentation.dto;
+package com.mottinut.bff.patient.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,16 +16,18 @@ public class PatientProfileDto {
     private String lastName;
     private String fullName;
     private String email;
-    private LocalDate birthDate;
-    private Integer age;
     private String phone;
-    private Double height;
-    private Double weight;
-    private Double bmi;
-    private Boolean hasMedicalCondition;
     private String chronicDisease;
     private String allergies;
     private String dietaryPreferences;
     private String emergencyContact;
+    private LocalDate birthDate;
+    private Integer age;
+    private Double height;
+    private Double weight;
+    private Double bmi;
+    private String bmiCategory; // New field for BFF
+    private Boolean hasMedicalCondition;
     private LocalDateTime createdAt;
 }
+
