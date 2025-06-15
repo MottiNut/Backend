@@ -1,9 +1,7 @@
 package com.mottinut.bff.patient.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +11,12 @@ public class UpdateMedicalHistoryRequest {
     private Double hipCircumference;
     private Double bodyFatPercentage;
     private String bloodPressure;
-
+    @Getter
+    @Setter
+    private Double height;
+    @Getter
+    @Setter
+    private Double weight;
     @Min(value = 0, message = "La frecuencia cardíaca debe ser positiva")
     private Integer heartRate;
 

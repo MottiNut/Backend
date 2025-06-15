@@ -11,4 +11,5 @@ public interface PatientProfileRepository {
     Optional<PatientProfile> findById(PatientId patientId);
     List<PatientProfile> findByChronicDisease(String chronicDisease);
     PatientProfile save(PatientProfile patient);
+    PatientProfile updateWeightAndHeight(PatientId patientId, Double weight, Double height);
 }

@@ -54,43 +54,94 @@ public class PatientManagementService {
         return patientRepository.findByChronicDisease(filter.getDescription().toLowerCase());
     }
 
-    public MedicalHistory createMedicalHistory(PatientId patientId, LocalDate consultationDate,
-                                               Double waistCircumference, Double hipCircumference,
-                                               Double bodyFatPercentage, String bloodPressure,
-                                               Integer heartRate, Double bloodGlucose, String lipidProfile,
-                                               String eatingHabits, Double waterConsumption, String supplementation,
-                                               Double caloricIntake, String macronutrients, String foodPreferences,
-                                               String foodRelationship, Integer stressLevel, Integer sleepQuality,
-                                               String nutritionalObjectives, String patientEvolution, String professionalNotes) {
+    public MedicalHistory createMedicalHistory(PatientId patientId,
+                                               LocalDate consultationDate,
+                                               Double height,
+                                               Double weight,
+                                               Double waistCircumference,
+                                               Double hipCircumference,
+                                               Double bodyFatPercentage,
+                                               String bloodPressure,
+                                               Integer heartRate,
+                                               Double bloodGlucose,
+                                               String lipidProfile,
+                                               String eatingHabits,
+                                               Double waterConsumption,
+                                               String supplementation,
+                                               Double caloricIntake,
+                                               String macronutrients,
+                                               String foodPreferences,
+                                               String foodRelationship,
+                                               Integer stressLevel,
+                                               Integer sleepQuality,
+                                               String nutritionalObjectives,
+                                               String patientEvolution,
+                                               String professionalNotes) {
+
         // Verificar que el paciente existe
         getPatientById(patientId);
 
-        MedicalHistory medicalHistory = MedicalHistory.create(patientId, consultationDate, waistCircumference,
-                hipCircumference, bodyFatPercentage, bloodPressure, heartRate, bloodGlucose, lipidProfile,
-                eatingHabits, waterConsumption, supplementation, caloricIntake, macronutrients,
-                foodPreferences, foodRelationship, stressLevel, sleepQuality, nutritionalObjectives,
-                patientEvolution, professionalNotes);
+        // Actualizar peso y altura si se proporcionan
+        if (height != null || weight != null) {
+            patientRepository.updateWeightAndHeight(patientId, weight, height);
+        }
+
+        // Crear el historial médico
+        MedicalHistory medicalHistory = MedicalHistory.create(
+                patientId, consultationDate, waistCircumference, hipCircumference,
+                bodyFatPercentage, bloodPressure, heartRate, bloodGlucose,
+                lipidProfile, eatingHabits, waterConsumption, supplementation,
+                caloricIntake, macronutrients, foodPreferences, foodRelationship,
+                stressLevel, sleepQuality, nutritionalObjectives, patientEvolution,
+                professionalNotes
+        );
+
         return medicalHistoryRepository.save(medicalHistory);
     }
 
-    public MedicalHistory updateMedicalHistory(MedicalHistoryId historyId, Double waistCircumference,
-                                               Double hipCircumference, Double bodyFatPercentage, String bloodPressure,
-                                               Integer heartRate, Double bloodGlucose, String lipidProfile,
-                                               String eatingHabits, Double waterConsumption, String supplementation,
-                                               Double caloricIntake, String macronutrients, String foodPreferences,
-                                               String foodRelationship, Integer stressLevel, Integer sleepQuality,
-                                               String nutritionalObjectives, String patientEvolution, String professionalNotes) {
+    public MedicalHistory updateMedicalHistory(MedicalHistoryId historyId,
+                                               Double height,
+                                               Double weight,
+                                               Double waistCircumference,
+                                               Double hipCircumference,
+                                               Double bodyFatPercentage,
+                                               String bloodPressure,
+                                               Integer heartRate,
+                                               Double bloodGlucose,
+                                               String lipidProfile,
+                                               String eatingHabits,
+                                               Double waterConsumption,
+                                               String supplementation,
+                                               Double caloricIntake,
+                                               String macronutrients,
+                                               String foodPreferences,
+                                               String foodRelationship,
+                                               Integer stressLevel,
+                                               Integer sleepQuality,
+                                               String nutritionalObjectives,
+                                               String patientEvolution,
+                                               String professionalNotes) {
+
         MedicalHistory existingHistory = medicalHistoryRepository.findById(historyId)
                 .orElseThrow(() -> new NotFoundException("Historial médico no encontrado"));
 
-        MedicalHistory updatedHistory = existingHistory.update(waistCircumference, hipCircumference,
-                bodyFatPercentage, bloodPressure, heartRate, bloodGlucose, lipidProfile, eatingHabits,
-                waterConsumption, supplementation, caloricIntake, macronutrients, foodPreferences,
-                foodRelationship, stressLevel, sleepQuality, nutritionalObjectives, patientEvolution,
-                professionalNotes);
+        // Actualizar peso y altura del paciente si se proporcionan
+        // Usar el PatientId del historial existente
+        if (height != null || weight != null) {
+            patientRepository.updateWeightAndHeight(existingHistory.getPatientId(), weight, height);
+        }
+
+        MedicalHistory updatedHistory = existingHistory.update(
+                waistCircumference, hipCircumference, bodyFatPercentage,
+                bloodPressure, heartRate, bloodGlucose, lipidProfile,
+                eatingHabits, waterConsumption, supplementation, caloricIntake,
+                macronutrients, foodPreferences, foodRelationship, stressLevel,
+                sleepQuality, nutritionalObjectives, patientEvolution, professionalNotes
+        );
 
         return medicalHistoryRepository.save(updatedHistory);
     }
+
 
     public List<MedicalHistory> getPatientHistoriesInDateRange(PatientId patientId, LocalDate startDate, LocalDate endDate) {
         return medicalHistoryRepository.findByPatientIdAndDateRange(patientId, startDate, endDate);

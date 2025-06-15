@@ -7,6 +7,7 @@ import com.mottinut.patient.domain.entity.PatientProfile;
 import com.mottinut.patient.domain.repositories.PatientProfileRepository;
 import com.mottinut.patient.domain.valueobjects.PatientId;
 import com.mottinut.patient.infrastructure.persistence.mappers.PatientMapper;
+import com.mottinut.shared.domain.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -52,5 +53,21 @@ public class JpaPatientProfileRepository implements PatientProfileRepository {
         // Este método se usaría solo para actualizaciones de datos básicos del paciente
         // La creación de pacientes se mantiene en el módulo auth
         throw new UnsupportedOperationException("La creación de pacientes se maneja en el módulo auth");
+    }
+
+    @Override
+    public PatientProfile updateWeightAndHeight(PatientId patientId, Double weight, Double height) {
+        PatientEntity patientEntity = (PatientEntity) userJpaRepository.findById(patientId.getValue())
+                .orElseThrow(() -> new NotFoundException("Paciente no encontrado"));
+
+        if (weight != null) {
+            patientEntity.setWeight(weight);
+        }
+        if (height != null) {
+            patientEntity.setHeight(height);
+        }
+
+        PatientEntity savedEntity = userJpaRepository.save(patientEntity);
+        return patientMapper.toPatientProfile(savedEntity);
     }
 }

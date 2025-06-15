@@ -2,9 +2,7 @@ package com.mottinut.bff.patient.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -14,7 +12,13 @@ import java.time.LocalDate;
 public class CreateMedicalHistoryRequest {
     @NotNull(message = "La fecha de consulta es requerida")
     private LocalDate consultationDate;
-
+    // Nuevos getters y setters
+    @Getter
+    @Setter
+    private Double height;
+    @Getter
+    @Setter
+    private Double weight;
     private Double waistCircumference;
     private Double hipCircumference;
     private Double bodyFatPercentage;
@@ -52,4 +56,5 @@ public class CreateMedicalHistoryRequest {
     private String nutritionalObjectives;
     private String patientEvolution;
     private String professionalNotes;
+
 }

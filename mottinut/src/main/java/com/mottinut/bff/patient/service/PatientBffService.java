@@ -108,13 +108,16 @@ public class PatientBffService {
                 .collect(Collectors.toList());
     }
 
-    public MedicalHistoryDto createMedicalHistory(Long patientId, CreateMedicalHistoryRequest request, Authentication authentication) {
-        // Verificar que es nutricionista
+    public MedicalHistoryDto createMedicalHistory(Long patientId,
+                                                  CreateMedicalHistoryRequest request,
+                                                  Authentication authentication) {
         validateNutritionist(authentication);
 
         MedicalHistory createdHistory = patientManagementService.createMedicalHistory(
                 PatientId.of(patientId),
                 request.getConsultationDate(),
+                request.getHeight(),        // Nuevo parámetro
+                request.getWeight(),        // Nuevo parámetro
                 request.getWaistCircumference(),
                 request.getHipCircumference(),
                 request.getBodyFatPercentage(),
@@ -135,15 +138,19 @@ public class PatientBffService {
                 request.getPatientEvolution(),
                 request.getProfessionalNotes()
         );
+
         return patientBffMapper.toMedicalHistoryDto(createdHistory);
     }
 
-    public MedicalHistoryDto updateMedicalHistory(Long historyId, UpdateMedicalHistoryRequest request, Authentication authentication) {
-        // Verificar que es nutricionista
+    public MedicalHistoryDto updateMedicalHistory(Long historyId,
+                                                  UpdateMedicalHistoryRequest request,
+                                                  Authentication authentication) {
         validateNutritionist(authentication);
 
         MedicalHistory updatedHistory = patientManagementService.updateMedicalHistory(
                 MedicalHistoryId.of(historyId),
+                request.getHeight(),
+                request.getWeight(),
                 request.getWaistCircumference(),
                 request.getHipCircumference(),
                 request.getBodyFatPercentage(),
@@ -164,6 +171,7 @@ public class PatientBffService {
                 request.getPatientEvolution(),
                 request.getProfessionalNotes()
         );
+
         return patientBffMapper.toMedicalHistoryDto(updatedHistory);
     }
 
