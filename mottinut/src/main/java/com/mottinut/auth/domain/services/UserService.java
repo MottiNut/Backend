@@ -34,11 +34,11 @@ public class UserService {
     public Patient updatePatientProfile(UserId userId, String firstName, String lastName, String phone,
                                         Double height, Double weight, boolean hasMedicalCondition,
                                         String chronicDisease, String allergies, String dietaryPreferences,
-                                        String emergencyContact) {
+                                        String emergencyContact, String gender) {
         Patient patient = getPatientById(userId);
         patient.updateBasicProfile(firstName, lastName, phone);
         patient.updateMedicalProfile(height, weight, hasMedicalCondition, chronicDisease,
-                allergies, dietaryPreferences, emergencyContact);
+                allergies, dietaryPreferences, emergencyContact, gender);
         return (Patient) userRepository.save(patient);
     }
 

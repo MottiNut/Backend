@@ -7,12 +7,17 @@ import com.mottinut.nutritionplan.domain.enums.PatientAction;
 import com.mottinut.nutritionplan.domain.enums.ReviewAction;
 import com.mottinut.nutritionplan.domain.repositories.NutritionPlanRepository;
 import com.mottinut.nutritionplan.domain.valueobjects.NutritionPlanId;
+import com.mottinut.patient.domain.entity.MedicalHistory;
+import com.mottinut.patient.domain.repositories.MedicalHistoryRepository;
+import com.mottinut.patient.domain.valueobjects.PatientId;
 import com.mottinut.shared.domain.exceptions.NotFoundException;
 import com.mottinut.shared.domain.exceptions.UnauthorizedException;
 import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.UserId;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -24,29 +29,48 @@ public class NutritionPlanService {
     private final NutritionPlanRepository nutritionPlanRepository;
     private final AiPlanGeneratorService aiPlanGeneratorService;
     private final UserService userService;
+    private final MedicalHistoryRepository medicalHistoryRepository;
+    private static final Logger logger = LoggerFactory.getLogger(NutritionPlanService.class);
 
     public NutritionPlanService(NutritionPlanRepository nutritionPlanRepository,
                                 AiPlanGeneratorService aiPlanGeneratorService,
-                                UserService userService) {
+                                UserService userService,
+                                MedicalHistoryRepository medicalHistoryRepository) {
         this.nutritionPlanRepository = nutritionPlanRepository;
         this.aiPlanGeneratorService = aiPlanGeneratorService;
         this.userService = userService;
+        this.medicalHistoryRepository = medicalHistoryRepository;
+    }
+
+    private void validatePatientHasMedicalHistory(UserId patientId) {
+        List<MedicalHistory> medicalHistories = medicalHistoryRepository.findByPatientId(new PatientId(patientId.getValue()));
+
+        if (medicalHistories.isEmpty()) {
+            logger.error("Intento de generar plan nutricional sin historial médico para paciente: {}", patientId.getValue());
+            throw new IllegalStateException("No se puede generar el plan nutricional. El paciente debe tener al menos un historial médico registrado por un nutricionista antes de generar su primer plan.");
+        }
+
+        logger.info("Validación exitosa: Paciente {} tiene {} historiales médicos", patientId.getValue(), medicalHistories.size());
     }
 
     public NutritionPlan generatePlan(UserId nutritionistId, UserId patientId,
                                       LocalDate weekStartDate, Integer energyRequirement,
                                       String goal, String specialRequirements) {
-        // Verificar que el nutricionista existe
+        User patient = userService.getUserById(patientId);
         User nutritionist = userService.getUserById(nutritionistId);
+
+        // Verificar que el nutricionista existe
         if (!nutritionist.getRole().isNutritionist()) {
             throw new UnauthorizedException("Solo nutricionistas pueden generar planes");
         }
 
         // Verificar que el paciente existe
-        User patient = userService.getUserById(patientId);
         if (!patient.getRole().isPatient()) {
             throw new ValidationException("El usuario debe ser un paciente");
         }
+
+        //Verificar que el paciente tiene historial medico
+        validatePatientHasMedicalHistory(patientId);
 
         try {
             // Generar plan con IA (ahora directamente desde Spring Boot)

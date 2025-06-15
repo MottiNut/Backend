@@ -15,10 +15,10 @@ public class UserFactory {
     public Patient createPatient(UserId userId, Email email, Password password,
                                  String firstName, String lastName, LocalDate birthDate, String phone,
                                  Double height, Double weight, boolean hasMedicalCondition,
-                                 String chronicDisease, String allergies, String dietaryPreferences) {
+                                 String chronicDisease, String allergies, String dietaryPreferences, String gender) {
         return new Patient(userId, email, password, firstName, lastName, birthDate, phone,
                 height, weight, hasMedicalCondition, chronicDisease, allergies,
-                dietaryPreferences, null); //
+                dietaryPreferences, null, gender); //
     }
 
     public Nutritionist createNutritionist(UserId userId, Email email, Password password,

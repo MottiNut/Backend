@@ -59,7 +59,8 @@ public class AuthBffService {
                 request.getHasMedicalCondition(),
                 request.getChronicDisease(),
                 request.getAllergies(),
-                request.getDietaryPreferences()
+                request.getDietaryPreferences(),
+                request.getGender()
         );
 
         Token token = jwtTokenProvider.generateToken(patient.getUserId(), patient.getRole());
@@ -120,7 +121,8 @@ public class AuthBffService {
                 request.getChronicDisease(),
                 request.getAllergies(),
                 request.getDietaryPreferences(),
-                request.getEmergencyContact()
+                request.getEmergencyContact(),
+                request.getGender()
         );
 
         return PatientProfileResponse.fromPatient(updatedPatient);

@@ -35,6 +35,7 @@ public class PatientBffMapper {
         dto.setAllergies(patient.getAllergies());
         dto.setDietaryPreferences(patient.getDietaryPreferences());
         dto.setEmergencyContact(patient.getEmergencyContact());
+        dto.setGender(patient.getGender());
         dto.setCreatedAt(patient.getCreatedAt());
 
         return dto;
@@ -109,6 +110,7 @@ public class PatientBffMapper {
 
         dto.setHasMedicalCondition(patient.isHasMedicalCondition());
         dto.setChronicDisease(patient.getChronicDisease());
+        dto.setGender(patient.getGender());
 
         if (latestHistory != null) {
             dto.setLastConsultationDate(latestHistory.getConsultationDate());

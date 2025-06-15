@@ -17,6 +17,7 @@ public class PatientHealthSummaryDto {
     private String bmiCategory;
     private Boolean hasMedicalCondition;
     private String chronicDisease;
+    private String gender;
     private LocalDate lastConsultationDate;
     private String bloodPressure;
     private Double bloodGlucose;

@@ -42,7 +42,8 @@ public class UserMapper {
                 entity.getChronicDisease(),
                 entity.getAllergies(),
                 entity.getDietaryPreferences(),
-                entity.getEmergencyContact()
+                entity.getEmergencyContact(),
+                entity.getGender()
         );
     }
 
@@ -87,6 +88,7 @@ public class UserMapper {
         entity.setAllergies(patient.getAllergies());
         entity.setDietaryPreferences(patient.getDietaryPreferences());
         entity.setEmergencyContact(patient.getEmergencyContact());
+        entity.setGender(patient.getGender());
 
         return entity;
     }

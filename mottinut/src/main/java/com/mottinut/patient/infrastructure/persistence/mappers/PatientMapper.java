@@ -35,6 +35,7 @@ public class PatientMapper {
                 patientEntity.getAllergies(),
                 patientEntity.getDietaryPreferences(),
                 patientEntity.getEmergencyContact(),
+                patientEntity.getGender(),
                 patientEntity.getCreatedAt()
         );
     }

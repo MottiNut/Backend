@@ -36,5 +36,6 @@ public class RegisterPatientRequest {
     private String chronicDisease;
     private String allergies;
     private String dietaryPreferences;
+    private String gender;
 }
 

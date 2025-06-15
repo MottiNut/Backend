@@ -22,12 +22,14 @@ public class Patient extends User {
     private String dietaryPreferences;
     @Getter
     private String emergencyContact;
+    @Getter
+    private String gender;
 
     public Patient(UserId userId, Email email, Password password,
                    String firstName, String lastName, LocalDate birthDate, String phone,
                    Double height, Double weight, boolean hasMedicalCondition,
                    String chronicDisease, String allergies, String dietaryPreferences,
-                   String emergencyContact) {
+                   String emergencyContact, String gender) {
         super(userId, email, password, Role.PATIENT, firstName, lastName, birthDate, phone);
         this.height = height;
         this.weight = weight;
@@ -36,6 +38,7 @@ public class Patient extends User {
         this.allergies = allergies;
         this.dietaryPreferences = dietaryPreferences;
         this.emergencyContact = emergencyContact;
+        this.gender = gender;
     }
 
     public boolean hasMedicalCondition() {
@@ -44,7 +47,7 @@ public class Patient extends User {
 
     public void updateMedicalProfile(Double height, Double weight, boolean hasMedicalCondition,
                                      String chronicDisease, String allergies, String dietaryPreferences,
-                                     String emergencyContact) {
+                                     String emergencyContact, String gender) {
         this.height = height;
         this.weight = weight;
         this.hasMedicalCondition = hasMedicalCondition;
@@ -52,6 +55,7 @@ public class Patient extends User {
         this.allergies = allergies;
         this.dietaryPreferences = dietaryPreferences;
         this.emergencyContact = emergencyContact;
+        this.gender = gender;
     }
 
     public double calculateBMI() {

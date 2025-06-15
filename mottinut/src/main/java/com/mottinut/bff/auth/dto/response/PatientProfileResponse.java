@@ -17,6 +17,7 @@ public class PatientProfileResponse extends UserProfileResponse {
     private String allergies;
     private String dietaryPreferences;
     private String emergencyContact;
+    private String gender;
 
     public static PatientProfileResponse fromPatient(Patient patient) {
         PatientProfileResponse response = new PatientProfileResponse();
@@ -36,6 +37,7 @@ public class PatientProfileResponse extends UserProfileResponse {
         response.setAllergies(patient.getAllergies());
         response.setDietaryPreferences(patient.getDietaryPreferences());
         response.setEmergencyContact(patient.getEmergencyContact());
+        response.setGender(patient.getGender());
         return response;
     }
 }

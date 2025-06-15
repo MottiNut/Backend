@@ -24,7 +24,9 @@ public class PatientProfile {
     private final String allergies;
     private final String dietaryPreferences;
     private final String emergencyContact;
+    private final String gender;
     private final LocalDateTime createdAt;
+
 
     public String getFullName() {
         return firstName + " " + lastName;

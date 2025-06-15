@@ -26,8 +26,9 @@ public class PatientProfileDto {
     private Double height;
     private Double weight;
     private Double bmi;
-    private String bmiCategory; // New field for BFF
+    private String bmiCategory;
     private Boolean hasMedicalCondition;
+    private String gender;
     private LocalDateTime createdAt;
 }
 

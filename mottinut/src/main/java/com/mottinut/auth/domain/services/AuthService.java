@@ -31,7 +31,7 @@ public class AuthService {
     public Patient registerPatient(Email email, String plainPassword, String firstName,
                                    String lastName, LocalDate birthDate, String phone,
                                    Double height, Double weight, boolean hasMedicalCondition,
-                                   String chronicDisease, String allergies, String dietaryPreferences) {
+                                   String chronicDisease, String allergies, String dietaryPreferences, String gender) {
 
         if (userRepository.existsByEmail(email)) {
             throw new ValidationException("El email ya existe");
@@ -41,7 +41,7 @@ public class AuthService {
 
         Patient patient = userFactory.createPatient(
                 null, email, password, firstName, lastName, birthDate, phone,
-                height, weight, hasMedicalCondition, chronicDisease, allergies, dietaryPreferences
+                height, weight, hasMedicalCondition, chronicDisease, allergies, dietaryPreferences, gender
         );
 
         return (Patient) userRepository.save(patient);

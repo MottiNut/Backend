@@ -7,6 +7,7 @@ import com.mottinut.auth.domain.services.UserService;
 import com.mottinut.nutritionplan.domain.services.AiPlanGeneratorService;
 import com.mottinut.nutritionplan.domain.services.SpringBootAiPlanGeneratorService;
 import com.mottinut.nutritionplan.infrastructure.external.ai.OpenAIClient;
+import com.mottinut.patient.domain.repositories.MedicalHistoryRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,8 +42,8 @@ public class AiConfiguration {
     @Bean
     @ConditionalOnProperty(name = "ai.provider", havingValue = "spring", matchIfMissing = true)
     public AiPlanGeneratorService springBootAiPlanGeneratorService(
-            OpenAIClient openAIClient, UserService userService) {
-        return new SpringBootAiPlanGeneratorService(openAIClient, userService);
+            OpenAIClient openAIClient, UserService userService, MedicalHistoryRepository medicalHistoryRepository) {
+        return new SpringBootAiPlanGeneratorService(openAIClient, userService, medicalHistoryRepository);
     }
 
 

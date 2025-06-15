@@ -12,6 +12,8 @@ import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
 import com.mottinut.nutritionplan.domain.enums.ReviewAction;
 import com.mottinut.nutritionplan.domain.services.NutritionPlanService;
 import com.mottinut.nutritionplan.domain.valueobjects.NutritionPlanId;
+import com.mottinut.shared.domain.exceptions.NotFoundException;
+import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.UserId;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
@@ -43,14 +45,21 @@ public class NutritionistNutritionPlanService {
             UserId patientId = new UserId(request.getPatientUserId());
             LocalDate weekStartDate = LocalDate.parse(request.getWeekStartDate());
 
-            NutritionPlan plan = nutritionPlanService.generatePlan(
-                    nutritionistId, patientId, weekStartDate,
+            NutritionPlan plan = nutritionPlanService.generatePlan(nutritionistId, patientId, weekStartDate,
                     request.getEnergyRequirement(), request.getGoal(),
                     request.getSpecialRequirements());
 
             return buildPlanResponse(plan);
+
+        } catch (IllegalStateException e) {
+            // Error específico para falta de historial médico
+            throw new ValidationException("MEDICAL_HISTORY_REQUIRED");
+
+        } catch (NotFoundException e) {
+            throw new ValidationException("RESOURCE_NOT_FOUND");
+
         } catch (Exception e) {
-            throw new RuntimeException("Error generando el plan nutricional: " + e.getMessage(), e);
+            throw new RuntimeException("Error interno del servidor al generar el plan nutricional", e);
         }
     }
 

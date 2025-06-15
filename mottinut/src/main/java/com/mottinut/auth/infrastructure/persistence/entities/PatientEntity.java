@@ -30,6 +30,9 @@ public class PatientEntity extends UserEntity {
     @Column(name = "emergency_contact")
     private String emergencyContact;
 
+    @Column(name = "gender")
+    private String gender;
+
     @Override
     protected void onCreate() {
         super.onCreate();

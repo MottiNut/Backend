@@ -11,6 +11,7 @@ public class UpdatePatientProfileRequest {
     private String allergies;
     private String dietaryPreferences;
     private String emergencyContact;
+    private String gender;
 
     // Getters y setters
     public String getFirstName() { return firstName; }
@@ -42,4 +43,7 @@ public class UpdatePatientProfileRequest {
 
     public String getEmergencyContact() { return emergencyContact; }
     public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
 }
