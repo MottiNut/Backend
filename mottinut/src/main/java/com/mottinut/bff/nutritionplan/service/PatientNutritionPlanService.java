@@ -146,19 +146,19 @@ public class PatientNutritionPlanService {
                 JsonNode dayPlan = dailyPlansNode.get(dayNumber - 1);
 
                 // Extraer las comidas del día
-                Map<String, Object> meals = new HashMap<>();
+                Object meals; // Cambiar de Map<String, Object> a Object
 
                 JsonNode mealsNode = dayPlan.get("meals");
                 if (mealsNode != null && mealsNode.isArray()) {
                     // Formato: "meals": [{"type": "Desayuno", ...}, ...]
-                    List<Map<String, Object>> mealsList = new ArrayList<>();
-                    for (JsonNode mealNode : mealsNode) {
-                        mealsList.add(objectMapper.convertValue(mealNode, Map.class));
-                    }
-                    meals.put("meals", mealsList);
+                    // Convertir directamente a lista sin envolver en otro objeto
+                    meals = objectMapper.convertValue(mealsNode, List.class);
                 } else if (mealsNode != null) {
                     // Formato alternativo: objeto con propiedades
                     meals = objectMapper.convertValue(mealsNode, new TypeReference<Map<String, Object>>() {});
+                } else {
+                    // Si no hay comidas, inicializar como lista vacía
+                    meals = new ArrayList<>();
                 }
 
                 // Extraer calorías totales
@@ -183,7 +183,7 @@ public class PatientNutritionPlanService {
                 return DailyPlanResponseDto.builder()
                         .date(date.toString())
                         .dayName(getDayName(dayNumber))
-                        .meals(meals)
+                        .meals(meals) // Ahora meals será directamente la lista o el objeto
                         .totalCalories(totalCalories)
                         .macronutrients(macronutrients)
                         .build();
@@ -215,24 +215,20 @@ public class PatientNutritionPlanService {
                     JsonNode dayPlan = dailyPlansNode.get(i);
                     LocalDate dayDate = plan.getWeekStartDate().plusDays(i);
 
-                    // Extraer las comidas del día
-                    Map<String, Object> meals = new HashMap<>();
+                    // Extraer las comidas del día - CORRECCIÓN APLICADA
+                    Object meals; // Cambiar de Map<String, Object> a Object
 
-                    // Verificar si las comidas están en formato array "meals" o como propiedades del día
                     JsonNode mealsNode = dayPlan.get("meals");
                     if (mealsNode != null && mealsNode.isArray()) {
                         // Formato: "meals": [{"type": "Desayuno", ...}, ...]
-                        List<Map<String, Object>> mealsList = new ArrayList<>();
-                        for (JsonNode mealNode : mealsNode) {
-                            mealsList.add(objectMapper.convertValue(mealNode, Map.class));
-                        }
-                        meals.put("meals", mealsList);
+                        // Convertir directamente a lista sin envolver en otro objeto
+                        meals = objectMapper.convertValue(mealsNode, List.class);
+                    } else if (mealsNode != null) {
+                        // Formato alternativo: objeto con propiedades
+                        meals = objectMapper.convertValue(mealsNode, new TypeReference<Map<String, Object>>() {});
                     } else {
-                        // Formato alternativo: propiedades directas del día
-                        meals = objectMapper.convertValue(dayPlan.get("meals"), Map.class);
-                        if (meals == null) {
-                            meals = new HashMap<>();
-                        }
+                        // Si no hay comidas, inicializar como lista vacía
+                        meals = new ArrayList<>();
                     }
 
                     // Extraer calorías totales
@@ -260,7 +256,7 @@ public class PatientNutritionPlanService {
                     DailyPlanResponseDto dailyPlan = DailyPlanResponseDto.builder()
                             .date(dayDate.toString())
                             .dayName(getDayName(i + 1))
-                            .meals(meals)
+                            .meals(meals) // Ahora meals será directamente la lista o el objeto
                             .totalCalories(totalCalories)
                             .macronutrients(macronutrients)
                             .build();

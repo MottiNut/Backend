@@ -10,7 +10,7 @@ import java.util.Map;
 public class DailyPlanResponseDto {
     private String date;
     private String dayName;
-    private Map<String, Object> meals; // breakfast, lunch, dinner, snacks
+    private Object meals; // Cambiar de Map<String, Object> a Object para manejar tanto listas como objetos
     private Integer totalCalories;
-    private Map<String, Number> macronutrients; // proteins, carbs, fats
+    private Map<String, Number> macronutrients;
 }
