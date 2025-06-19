@@ -25,4 +25,6 @@ public class GeneratePlanRequestDto {
     private String goal;
 
     private String specialRequirements;
+
+    private Integer mealsPerDay;
 }

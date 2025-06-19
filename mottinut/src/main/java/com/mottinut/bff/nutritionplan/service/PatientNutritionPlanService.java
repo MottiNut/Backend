@@ -20,14 +20,13 @@ import com.mottinut.shared.domain.exceptions.NotFoundException;
 import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.UserId;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +36,7 @@ public class PatientNutritionPlanService {
     private final NutritionPlanService nutritionPlanService;
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private static final Logger logger = LoggerFactory.getLogger(PatientNutritionPlanService.class);
 
     public PatientNutritionPlanService(NutritionPlanService nutritionPlanService,
                                        ObjectMapper objectMapper,
@@ -135,22 +135,65 @@ public class PatientNutritionPlanService {
     private DailyPlanResponseDto extractDailyPlan(NutritionPlan plan, int dayNumber, LocalDate date) {
         try {
             JsonNode planJson = objectMapper.readTree(plan.getPlanContent());
-            JsonNode dailyPlans = planJson.get("daily_plans");
 
-            if (dailyPlans != null && dailyPlans.isArray() && dailyPlans.size() >= dayNumber) {
-                JsonNode dayPlan = dailyPlans.get(dayNumber - 1);
+            // Intentar ambos formatos: "days" (nuevo) y "daily_plans" (anterior)
+            JsonNode dailyPlansNode = planJson.get("days");
+            if (dailyPlansNode == null) {
+                dailyPlansNode = planJson.get("daily_plans");
+            }
+
+            if (dailyPlansNode != null && dailyPlansNode.isArray() && dailyPlansNode.size() >= dayNumber) {
+                JsonNode dayPlan = dailyPlansNode.get(dayNumber - 1);
+
+                // Extraer las comidas del día
+                Map<String, Object> meals = new HashMap<>();
+
+                JsonNode mealsNode = dayPlan.get("meals");
+                if (mealsNode != null && mealsNode.isArray()) {
+                    // Formato: "meals": [{"type": "Desayuno", ...}, ...]
+                    List<Map<String, Object>> mealsList = new ArrayList<>();
+                    for (JsonNode mealNode : mealsNode) {
+                        mealsList.add(objectMapper.convertValue(mealNode, Map.class));
+                    }
+                    meals.put("meals", mealsList);
+                } else if (mealsNode != null) {
+                    // Formato alternativo: objeto con propiedades
+                    meals = objectMapper.convertValue(mealsNode, new TypeReference<Map<String, Object>>() {});
+                }
+
+                // Extraer calorías totales
+                int totalCalories = plan.getEnergyRequirement(); // valor por defecto
+                JsonNode caloriesNode = dayPlan.get("total_calories");
+                if (caloriesNode != null) {
+                    totalCalories = caloriesNode.asInt();
+                }
+
+                // Extraer macronutrientes
+                Map<String, Number> macronutrients = new HashMap<>();
+                JsonNode macrosNode = dayPlan.get("macronutrients");
+                if (macrosNode != null) {
+                    macronutrients = objectMapper.convertValue(macrosNode, new TypeReference<Map<String, Number>>() {});
+                } else {
+                    // Valores por defecto
+                    macronutrients.put("protein", totalCalories * 0.20 / 4);
+                    macronutrients.put("carbs", totalCalories * 0.50 / 4);
+                    macronutrients.put("fat", totalCalories * 0.30 / 9);
+                }
 
                 return DailyPlanResponseDto.builder()
                         .date(date.toString())
                         .dayName(getDayName(dayNumber))
-                        .meals(objectMapper.convertValue(dayPlan.get("meals"), new TypeReference<Map<String, Object>>() {}))
-                        .totalCalories(dayPlan.get("total_calories").asInt())
-                        .macronutrients(objectMapper.convertValue(dayPlan.get("macronutrients"), new TypeReference<Map<String, Number>>() {}))
+                        .meals(meals)
+                        .totalCalories(totalCalories)
+                        .macronutrients(macronutrients)
                         .build();
             }
 
             throw new NotFoundException("Plan del día no encontrado");
+
         } catch (Exception e) {
+            logger.error("Error procesando el plan del día {} para plan ID {}: {}",
+                    dayNumber, plan.getPlanId().getValue(), e.getMessage(), e);
             throw new RuntimeException("Error procesando el plan nutricional: " + e.getMessage());
         }
     }
@@ -158,21 +201,68 @@ public class PatientNutritionPlanService {
     private WeeklyPlanResponseDto buildWeeklyPlanResponse(NutritionPlan plan) {
         try {
             JsonNode planJson = objectMapper.readTree(plan.getPlanContent());
-            JsonNode dailyPlans = planJson.get("daily_plans");
+
+            // Intentar ambos formatos: "days" (nuevo) y "daily_plans" (anterior)
+            JsonNode dailyPlansNode = planJson.get("days");
+            if (dailyPlansNode == null) {
+                dailyPlansNode = planJson.get("daily_plans");
+            }
 
             List<DailyPlanResponseDto> dailyPlanList = new ArrayList<>();
 
-            if (dailyPlans != null && dailyPlans.isArray()) {
-                for (int i = 0; i < Math.min(7, dailyPlans.size()); i++) {
-                    JsonNode dayPlan = dailyPlans.get(i);
+            if (dailyPlansNode != null && dailyPlansNode.isArray()) {
+                for (int i = 0; i < Math.min(7, dailyPlansNode.size()); i++) {
+                    JsonNode dayPlan = dailyPlansNode.get(i);
                     LocalDate dayDate = plan.getWeekStartDate().plusDays(i);
+
+                    // Extraer las comidas del día
+                    Map<String, Object> meals = new HashMap<>();
+
+                    // Verificar si las comidas están en formato array "meals" o como propiedades del día
+                    JsonNode mealsNode = dayPlan.get("meals");
+                    if (mealsNode != null && mealsNode.isArray()) {
+                        // Formato: "meals": [{"type": "Desayuno", ...}, ...]
+                        List<Map<String, Object>> mealsList = new ArrayList<>();
+                        for (JsonNode mealNode : mealsNode) {
+                            mealsList.add(objectMapper.convertValue(mealNode, Map.class));
+                        }
+                        meals.put("meals", mealsList);
+                    } else {
+                        // Formato alternativo: propiedades directas del día
+                        meals = objectMapper.convertValue(dayPlan.get("meals"), Map.class);
+                        if (meals == null) {
+                            meals = new HashMap<>();
+                        }
+                    }
+
+                    // Extraer calorías totales
+                    int totalCalories = 0;
+                    JsonNode caloriesNode = dayPlan.get("total_calories");
+                    if (caloriesNode != null) {
+                        totalCalories = caloriesNode.asInt();
+                    } else {
+                        // Calcular calorías si no están especificadas
+                        totalCalories = plan.getEnergyRequirement();
+                    }
+
+                    // Extraer macronutrientes
+                    Map<String, Number> macronutrients = new HashMap<>();
+                    JsonNode macrosNode = dayPlan.get("macronutrients");
+                    if (macrosNode != null) {
+                        macronutrients = objectMapper.convertValue(macrosNode, Map.class);
+                    } else {
+                        // Valores por defecto si no están especificados
+                        macronutrients.put("protein", totalCalories * 0.20 / 4); // 20% proteínas
+                        macronutrients.put("carbs", totalCalories * 0.50 / 4);   // 50% carbohidratos
+                        macronutrients.put("fat", totalCalories * 0.30 / 9);     // 30% grasas
+                    }
 
                     DailyPlanResponseDto dailyPlan = DailyPlanResponseDto.builder()
                             .date(dayDate.toString())
                             .dayName(getDayName(i + 1))
-                            .meals(objectMapper.convertValue(dayPlan.get("meals"), Map.class))
-                            .totalCalories(dayPlan.get("total_calories").asInt())
-                            .macronutrients(objectMapper.convertValue(dayPlan.get("macronutrients"), Map.class))
+                            .meals(meals)
+                            .totalCalories(totalCalories)
+                            .macronutrients(macronutrients)
                             .build();
 
                     dailyPlanList.add(dailyPlan);
@@ -190,8 +280,21 @@ public class PatientNutritionPlanService {
                     .dailyPlans(dailyPlanList)
                     .reviewNotes(plan.getReviewNotes())
                     .build();
+
         } catch (Exception e) {
-            throw new RuntimeException("Error procesando el plan semanal: " + e.getMessage());
+            logger.error("Error procesando el plan semanal para plan ID {}: {}",
+                    plan.getPlanId().getValue(), e.getMessage(), e);
+
+            // En caso de error, devolver respuesta con información básica
+            return WeeklyPlanResponseDto.builder()
+                    .planId(plan.getPlanId().getValue())
+                    .weekStartDate(plan.getWeekStartDate().toString())
+                    .weekEndDate(plan.getWeekStartDate().plusDays(6).toString())
+                    .goal(plan.getGoal())
+                    .energyRequirement(plan.getEnergyRequirement())
+                    .dailyPlans(new ArrayList<>())
+                    .reviewNotes(plan.getReviewNotes())
+                    .build();
         }
     }
 

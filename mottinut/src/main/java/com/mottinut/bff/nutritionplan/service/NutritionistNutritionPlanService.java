@@ -47,7 +47,7 @@ public class NutritionistNutritionPlanService {
 
             NutritionPlan plan = nutritionPlanService.generatePlan(nutritionistId, patientId, weekStartDate,
                     request.getEnergyRequirement(), request.getGoal(),
-                    request.getSpecialRequirements());
+                    request.getSpecialRequirements(), request.getMealsPerDay());
 
             return buildPlanResponse(plan);
 

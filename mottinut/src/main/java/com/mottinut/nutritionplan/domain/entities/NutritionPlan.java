@@ -17,7 +17,8 @@ public class NutritionPlan {
     private final Integer energyRequirement;
     private final String goal;
     private final String specialRequirements;
-    private String planContent; // Cambiar a no final para permitir edición
+    private final Integer mealsPerDay;
+    private String planContent;
     private PlanStatus status;
     private String reviewNotes;
     private String patientFeedback; // Nuevo campo
@@ -27,7 +28,7 @@ public class NutritionPlan {
 
     public NutritionPlan(NutritionPlanId planId, UserId patientId, UserId nutritionistId,
                          LocalDate weekStartDate, Integer energyRequirement, String goal,
-                         String specialRequirements, String planContent) {
+                         String specialRequirements, Integer mealsPerDay, String planContent) {
         this.planId = planId;
         this.patientId = patientId;
         this.nutritionistId = nutritionistId;
@@ -35,6 +36,7 @@ public class NutritionPlan {
         this.energyRequirement = energyRequirement;
         this.goal = goal;
         this.specialRequirements = specialRequirements;
+        this.mealsPerDay = mealsPerDay;
         this.planContent = planContent;
         this.status = PlanStatus.PENDING_REVIEW;
         this.createdAt = LocalDateTime.now();

@@ -6,5 +6,5 @@ import java.time.LocalDate;
 
 public interface AiPlanGeneratorService {
     String generatePlan(UserId patientId, LocalDate weekStartDate, Integer energyRequirement,
-                        String goal, String specialRequirements);
+                        String goal, String specialRequirements, Integer mealsPerDay);
 }

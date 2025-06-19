@@ -55,7 +55,7 @@ public class NutritionPlanService {
 
     public NutritionPlan generatePlan(UserId nutritionistId, UserId patientId,
                                       LocalDate weekStartDate, Integer energyRequirement,
-                                      String goal, String specialRequirements) {
+                                      String goal, String specialRequirements, Integer mealsPerDay) {
         User patient = userService.getUserById(patientId);
         User nutritionist = userService.getUserById(nutritionistId);
 
@@ -75,12 +75,12 @@ public class NutritionPlanService {
         try {
             // Generar plan con IA (ahora directamente desde Spring Boot)
             String planContent = aiPlanGeneratorService.generatePlan(
-                    patientId, weekStartDate, energyRequirement, goal, specialRequirements);
+                    patientId, weekStartDate, energyRequirement, goal, specialRequirements, mealsPerDay);
 
             // Crear y guardar el plan
             NutritionPlan plan = new NutritionPlan(
                     null, patientId, nutritionistId, weekStartDate,
-                    energyRequirement, goal, specialRequirements, planContent);
+                    energyRequirement, goal, specialRequirements, mealsPerDay, planContent);
 
             return nutritionPlanRepository.save(plan);
 

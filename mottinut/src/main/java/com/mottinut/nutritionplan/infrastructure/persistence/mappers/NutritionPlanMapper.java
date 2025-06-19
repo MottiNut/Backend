@@ -23,6 +23,7 @@ public class NutritionPlanMapper {
         entity.setEnergyRequirement(plan.getEnergyRequirement());
         entity.setGoal(plan.getGoal());
         entity.setSpecialRequirements(plan.getSpecialRequirements());
+        entity.setMealsPerDay(plan.getMealsPerDay());
         entity.setPlanContent(plan.getPlanContent());
         entity.setStatus(plan.getStatus().getValue());
         entity.setReviewNotes(plan.getReviewNotes());
@@ -42,6 +43,7 @@ public class NutritionPlanMapper {
                 entity.getEnergyRequirement(),
                 entity.getGoal(),
                 entity.getSpecialRequirements(),
+                entity.getMealsPerDay(),
                 entity.getPlanContent()
         );
 

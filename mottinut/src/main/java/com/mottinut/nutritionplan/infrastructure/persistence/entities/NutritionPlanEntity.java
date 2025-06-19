@@ -35,6 +35,9 @@ public class NutritionPlanEntity {
     @Column(name = "special_requirements", columnDefinition = "TEXT")
     private String specialRequirements;
 
+    @Column(name = "meals_per_day")
+    private Integer mealsPerDay;
+
     @Column(name = "plan_content", columnDefinition = "TEXT")
     private String planContent;
 

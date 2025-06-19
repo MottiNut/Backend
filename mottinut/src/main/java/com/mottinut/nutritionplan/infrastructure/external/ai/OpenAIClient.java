@@ -196,36 +196,55 @@ public class OpenAIClient {
 
     private boolean validateNutritionPlanStructure(JsonNode json) {
         try {
-            // Verificar estructura básica
-            if (!json.has("weekly_summary") || !json.has("daily_plans")) {
-                logger.error("JSON no tiene la estructura básica requerida");
+            // Verificar estructura básica - CORREGIR los nombres de campos
+            if (!json.has("plan_summary") || !json.has("days")) {
+                logger.error("JSON no tiene la estructura básica requerida. Campos encontrados: {}",
+                        json.fieldNames().toString());
                 return false;
             }
 
-            JsonNode dailyPlans = json.get("daily_plans");
-            if (!dailyPlans.isArray()) {
-                logger.error("daily_plans no es un array");
+            JsonNode days = json.get("days");
+            if (!days.isArray()) {
+                logger.error("'days' no es un array");
                 return false;
             }
 
-            int daysCount = dailyPlans.size();
+            int daysCount = days.size();
             logger.info("Plan generado con {} días", daysCount);
 
-            // Permitir planes con al menos 5 días (para casos donde se corta)
-            if (daysCount < 5) {
-                logger.error("Plan tiene menos de 5 días: {}", daysCount);
-                return false;
-            }
-
-            // Verificar que cada día tenga la estructura básica
-            for (JsonNode day : dailyPlans) {
-                if (!day.has("day") || !day.has("meals")) {
-                    logger.error("Día sin estructura básica: {}", day);
+            // Verificar que tenga exactamente 7 días (o al menos 5 si se acepta incompleto)
+            if (daysCount < 7) {
+                logger.warn("Plan tiene menos de 7 días: {}. Verificando si tiene al menos 5...", daysCount);
+                if (daysCount < 5) {
+                    logger.error("Plan tiene menos de 5 días: {}", daysCount);
                     return false;
                 }
             }
 
+            // Verificar que cada día tenga la estructura básica
+            for (JsonNode day : days) {
+                if (!day.has("day") || !day.has("meals")) {
+                    logger.error("Día sin estructura básica: {}", day);
+                    return false;
+                }
+
+                JsonNode meals = day.get("meals");
+                if (!meals.isArray() || meals.size() == 0) {
+                    logger.error("Día sin comidas válidas");
+                    return false;
+                }
+            }
+
+            // Verificar plan_summary
+            JsonNode planSummary = json.get("plan_summary");
+            if (!planSummary.has("daily_calories") || !planSummary.has("meals_per_day")) {
+                logger.error("plan_summary no tiene la estructura esperada");
+                return false;
+            }
+
+            logger.info("Validación exitosa: Plan con {} días validado correctamente", daysCount);
             return true;
+
         } catch (Exception e) {
             logger.error("Error validando estructura del plan: ", e);
             return false;
