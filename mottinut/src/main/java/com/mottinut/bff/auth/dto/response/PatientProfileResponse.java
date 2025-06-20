@@ -5,6 +5,8 @@ import com.mottinut.auth.domain.entities.Patient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Base64;
+
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -18,6 +20,8 @@ public class PatientProfileResponse extends UserProfileResponse {
     private String dietaryPreferences;
     private String emergencyContact;
     private String gender;
+    private String profileImageBase64; // Para enviar la imagen como base64
+    private String imageContentType;
 
     public static PatientProfileResponse fromPatient(Patient patient) {
         PatientProfileResponse response = new PatientProfileResponse();
@@ -38,6 +42,10 @@ public class PatientProfileResponse extends UserProfileResponse {
         response.setDietaryPreferences(patient.getDietaryPreferences());
         response.setEmergencyContact(patient.getEmergencyContact());
         response.setGender(patient.getGender());
+
+        response.setProfileImageBase64(patient.getProfileImage() != null ?
+                Base64.getEncoder().encodeToString(patient.getProfileImage()) : null);
+        response.setImageContentType(patient.getImageContentType());
         return response;
     }
 }

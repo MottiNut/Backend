@@ -42,6 +42,12 @@ public class UserService {
         return (Patient) userRepository.save(patient);
     }
 
+    public Patient updatePatientProfileImage(UserId userId, byte[] imageData, String contentType) {
+        Patient patient = getPatientById(userId);
+        patient.updateProfileImage(imageData, contentType);
+        return (Patient) userRepository.save(patient);
+    }
+
     public Nutritionist updateNutritionistProfile(UserId userId, String firstName, String lastName,
                                                   String phone, Integer yearsOfExperience, String biography) {
         Nutritionist nutritionist = getNutritionistById(userId);

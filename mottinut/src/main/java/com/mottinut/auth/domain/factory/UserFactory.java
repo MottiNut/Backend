@@ -12,13 +12,13 @@ import java.time.LocalDate;
 @Component
 public class UserFactory {
 
-    public Patient createPatient(UserId userId, Email email, Password password,
-                                 String firstName, String lastName, LocalDate birthDate, String phone,
-                                 Double height, Double weight, boolean hasMedicalCondition,
-                                 String chronicDisease, String allergies, String dietaryPreferences, String gender) {
+    public Patient createPatient(UserId userId, Email email, Password password, String firstName,
+                                 String lastName, LocalDate birthDate, String phone, Double height,
+                                 Double weight, boolean hasMedicalCondition, String chronicDisease,
+                                 String allergies, String dietaryPreferences, String gender) {
         return new Patient(userId, email, password, firstName, lastName, birthDate, phone,
                 height, weight, hasMedicalCondition, chronicDisease, allergies,
-                dietaryPreferences, null, gender); //
+                dietaryPreferences, null, gender, null, null); // nulls para imagen
     }
 
     public Nutritionist createNutritionist(UserId userId, Email email, Password password,

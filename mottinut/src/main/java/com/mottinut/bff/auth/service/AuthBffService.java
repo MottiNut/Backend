@@ -18,6 +18,9 @@ import com.mottinut.shared.domain.valueobjects.UserId;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 @Transactional
@@ -107,6 +110,18 @@ public class AuthBffService {
             return NutritionistProfileResponse.fromNutritionist(nutritionist);
         }
         throw new ValidationException("Tipo de usuario no válido");
+    }
+
+    public PatientProfileResponse updatePatientProfileImage(UserId userId, MultipartFile image) {
+        try {
+            byte[] imageData = image.getBytes();
+            String contentType = image.getContentType();
+
+            Patient updatedPatient = userService.updatePatientProfileImage(userId, imageData, contentType);
+            return PatientProfileResponse.fromPatient(updatedPatient);
+        } catch (IOException e) {
+            throw new ValidationException("Error al procesar la imagen");
+        }
     }
 
     public PatientProfileResponse updatePatientProfile(UserId userId, @Valid UpdatePatientProfileRequest request) {

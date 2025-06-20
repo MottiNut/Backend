@@ -24,12 +24,14 @@ public class Patient extends User {
     private String emergencyContact;
     @Getter
     private String gender;
+    @Getter private byte[] profileImage;
+    @Getter private String imageContentType;
 
-    public Patient(UserId userId, Email email, Password password,
-                   String firstName, String lastName, LocalDate birthDate, String phone,
-                   Double height, Double weight, boolean hasMedicalCondition,
-                   String chronicDisease, String allergies, String dietaryPreferences,
-                   String emergencyContact, String gender) {
+    public Patient(UserId userId, Email email, Password password, String firstName, String lastName,
+                   LocalDate birthDate, String phone, Double height, Double weight,
+                   boolean hasMedicalCondition, String chronicDisease, String allergies,
+                   String dietaryPreferences, String emergencyContact, String gender,
+                   byte[] profileImage, String imageContentType) {
         super(userId, email, password, Role.PATIENT, firstName, lastName, birthDate, phone);
         this.height = height;
         this.weight = weight;
@@ -39,6 +41,8 @@ public class Patient extends User {
         this.dietaryPreferences = dietaryPreferences;
         this.emergencyContact = emergencyContact;
         this.gender = gender;
+        this.profileImage = profileImage;
+        this.imageContentType = imageContentType;
     }
 
     public boolean hasMedicalCondition() {
@@ -56,6 +60,11 @@ public class Patient extends User {
         this.dietaryPreferences = dietaryPreferences;
         this.emergencyContact = emergencyContact;
         this.gender = gender;
+    }
+
+    public void updateProfileImage(byte[] profileImage, String imageContentType) {
+        this.profileImage = profileImage;
+        this.imageContentType = imageContentType;
     }
 
     public double calculateBMI() {

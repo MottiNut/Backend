@@ -33,6 +33,14 @@ public class PatientEntity extends UserEntity {
     @Column(name = "gender")
     private String gender;
 
+    // Agregar en PatientEntity
+    @Lob
+    @Column(name = "profile_image")
+    private byte[] profileImage;
+
+    @Column(name = "image_content_type")
+    private String imageContentType;
+
     @Override
     protected void onCreate() {
         super.onCreate();

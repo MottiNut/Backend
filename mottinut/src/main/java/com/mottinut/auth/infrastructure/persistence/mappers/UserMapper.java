@@ -43,7 +43,9 @@ public class UserMapper {
                 entity.getAllergies(),
                 entity.getDietaryPreferences(),
                 entity.getEmergencyContact(),
-                entity.getGender()
+                entity.getGender(),
+                entity.getProfileImage(),
+                entity.getImageContentType()
         );
     }
 
@@ -89,7 +91,8 @@ public class UserMapper {
         entity.setDietaryPreferences(patient.getDietaryPreferences());
         entity.setEmergencyContact(patient.getEmergencyContact());
         entity.setGender(patient.getGender());
-
+        entity.setProfileImage(patient.getProfileImage());
+        entity.setImageContentType(patient.getImageContentType());
         return entity;
     }
 
