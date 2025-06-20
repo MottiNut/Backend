@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/bff/auth/register/patient", "/api/bff/auth/register/nutritionist", "/api/bff/auth/login", "/api/auth/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll() // Para desarrollo con H2
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Para Swagger
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
