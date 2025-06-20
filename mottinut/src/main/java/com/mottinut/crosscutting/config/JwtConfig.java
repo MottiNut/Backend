@@ -1,4 +1,4 @@
-package com.mottinut.config;
+package com.mottinut.crosscutting.config;
 
 import lombok.Getter;
 import lombok.Setter;

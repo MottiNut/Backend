@@ -1,4 +1,4 @@
-package com.mottinut.config;
+package com.mottinut.crosscutting.config;
 
 import com.mottinut.crosscutting.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
