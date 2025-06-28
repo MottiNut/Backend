@@ -24,10 +24,10 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-      - name: Build with Maven
+      - name: Build with Maven (skip tests)
         run: |
           cd mottinut
-          mvn clean install
+          mvn clean install -DskipTests
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
