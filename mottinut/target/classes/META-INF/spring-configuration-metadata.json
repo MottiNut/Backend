@@ -1,0 +1,27 @@
+{
+  "groups": [
+    {
+      "name": "jwt",
+      "type": "com.mottinut.crosscutting.config.JwtConfig",
+      "sourceType": "com.mottinut.crosscutting.config.JwtConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "jwt.expiration",
+      "type": "java.lang.Long",
+      "sourceType": "com.mottinut.crosscutting.config.JwtConfig",
+      "defaultValue": 86400000
+    },
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "sourceType": "com.mottinut.crosscutting.config.JwtConfig",
+      "defaultValue": "your-secret-key-here-make-it-longer-for-production"
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}
