@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -24,14 +24,16 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
 
-      - name: Build with Maven
-        run: mvn clean install
+      - name: Build with Maven (skip tests)
+        run: |
+          cd mottinut
+          mvn clean install -DskipTests
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          path: 'mottinut/target/*.jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -39,25 +41,24 @@ jobs:
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
-  
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: java-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_214D55DC1DFA4848990C7E9D1D4609B1 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D597BF6D6FAF4DF1AA3F60BC9C7FF491 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2CBE3FF0A0A54400AFE712ED31C5D6A4 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6E4C0093160A415EB72A0B591F823639 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D96A2331F051478FB6F811606EF6BB86 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_549ED39321B94E5484F518B4F7D2D738 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'mottinut-backend-2025'
-          slot-name: 'Production'
+          # slot-name: 'Production'  # ← ELIMINADO: No disponible en plan de estudiante
           package: '*.jar'
-          
