@@ -1,4 +1,4 @@
-package com.mottinut.bff.auth.dto.response;
+package com.mottinut.auth.domain.emalServices.responsiveStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,17 +9,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponse {
-    private String token;
-    private Long userId;
-    private String email;
-    private String role;
-    private String fullName;
-
-    // Nuevos campos para verificación
+public class VerificationStatusResponse {
+    private boolean success;
     private boolean emailVerified;
     private boolean phoneVerified;
     private boolean fullyVerified;
-    private boolean requiresVerification;
+    private String emailVerifiedAt;
+    private String phoneVerifiedAt;
     private String message;
+
+
 }

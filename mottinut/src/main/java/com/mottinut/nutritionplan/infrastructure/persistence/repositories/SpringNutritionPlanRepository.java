@@ -1,16 +1,17 @@
 package com.mottinut.nutritionplan.infrastructure.persistence.repositories;
 
-import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
+
 import com.mottinut.nutritionplan.infrastructure.persistence.entities.NutritionPlanEntity;
-import com.mottinut.shared.domain.valueobjects.UserId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface SpringNutritionPlanRepository extends JpaRepository<NutritionPlanEntity, Long> {
 
     @Query("SELECT n FROM NutritionPlanEntity n WHERE n.status = 'pending_review' ORDER BY n.createdAt DESC")

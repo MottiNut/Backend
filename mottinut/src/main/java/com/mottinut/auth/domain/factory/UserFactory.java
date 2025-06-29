@@ -22,9 +22,64 @@ public class UserFactory {
     }
 
     public Nutritionist createNutritionist(UserId userId, Email email, Password password,
-                                           String firstName, String lastName, LocalDate birthDate, String phone,
-                                           String licenseNumber, String specialization, String workplace) {
-        return new Nutritionist(userId, email, password, firstName, lastName, birthDate, phone,
-                licenseNumber, specialization, workplace, null, null); // opcional
+                                           String firstName, String lastName, String phone,
+                                           String cnpCode, String specialty, String location,
+                                           byte[] profileImage, String profileImageContentType,
+                                           byte[] licenseFrontImage, byte[] licenseBackImage) {
+
+        LocalDate defaultBirthDate = LocalDate.now().minusYears(25); // Fecha por defecto
+
+        return new Nutritionist(
+                userId,
+                email,
+                password,
+                firstName,
+                lastName,
+                defaultBirthDate, // Usando fecha por defecto
+                phone,
+                profileImage,
+                profileImageContentType,
+                cnpCode,
+                licenseFrontImage,
+                licenseBackImage,
+                specialty,
+                null, // masterDegree - será null por defecto
+                null, // otherSpecialty - será null por defecto
+                location,
+                null, // address - será null por defecto, aunque el constructor lo requiere
+                true  // acceptTerms - será true por defecto
+        );
+    }
+
+    // Método sobrecargado con todos los parámetros opcionales
+    public Nutritionist createNutritionist(UserId userId, Email email, Password password,
+                                           String firstName, String lastName, String phone,
+                                           String cnpCode, String specialty, String location, String address,
+                                           String masterDegree, String otherSpecialty, boolean acceptTerms,
+                                           byte[] profileImage, String profileImageContentType,
+                                           byte[] licenseFrontImage, byte[] licenseBackImage) {
+
+        LocalDate defaultBirthDate = LocalDate.now().minusYears(25);
+
+        return new Nutritionist(
+                userId,
+                email,
+                password,
+                firstName,
+                lastName,
+                defaultBirthDate,
+                phone,
+                profileImage,
+                profileImageContentType,
+                cnpCode,
+                licenseFrontImage,
+                licenseBackImage,
+                specialty,
+                masterDegree,
+                otherSpecialty,
+                location,
+                address,
+                acceptTerms
+        );
     }
 }

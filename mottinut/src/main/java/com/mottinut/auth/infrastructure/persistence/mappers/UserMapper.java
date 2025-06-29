@@ -50,7 +50,8 @@ public class UserMapper {
     }
 
     private Nutritionist toNutritionistDomain(NutritionistEntity entity) {
-        return new Nutritionist(
+        // Constructor principal con campos requeridos
+        Nutritionist nutritionist = new Nutritionist(
                 entity.getUserId() != null ? new UserId(entity.getUserId()) : null,
                 new Email(entity.getEmail()),
                 Password.fromHash(entity.getPassword()),
@@ -58,12 +59,30 @@ public class UserMapper {
                 entity.getLastName(),
                 entity.getBirthDate(),
                 entity.getPhone(),
-                entity.getLicenseNumber(),
-                entity.getSpecialization(),
-                entity.getWorkplace(),
+                entity.getProfileImage(),        // Corregido
+                entity.getImageContentType(),   // Corregido
+                entity.getCnpCode(),            // Corregido
+                entity.getLicenseFrontImage(),
+                entity.getLicenseBackImage(),
+                entity.getSpecialty(),
+                entity.getMasterDegree(),
+                entity.getOtherSpecialty(),
+                entity.getLocation(),
+                entity.getAddress(),
+                entity.getAcceptTerms() != null ? entity.getAcceptTerms() : false, // acceptTerms
                 entity.getYearsOfExperience(),
                 entity.getBiography()
         );
+
+        // Actualizar estados de verificación
+        if (Boolean.TRUE.equals(entity.getEmailVerified())) {
+            nutritionist.verifyEmail();
+        }
+        if (Boolean.TRUE.equals(entity.getPhoneVerified())) {
+            nutritionist.verifyPhone();
+        }
+
+        return nutritionist;
     }
 
     public UserEntity toEntity(User user) {
@@ -91,8 +110,6 @@ public class UserMapper {
         entity.setDietaryPreferences(patient.getDietaryPreferences());
         entity.setEmergencyContact(patient.getEmergencyContact());
         entity.setGender(patient.getGender());
-        entity.setProfileImage(patient.getProfileImage());
-        entity.setImageContentType(patient.getImageContentType());
         return entity;
     }
 
@@ -101,11 +118,19 @@ public class UserMapper {
         setCommonFields(entity, nutritionist);
 
         // Campos específicos del nutricionista
-        entity.setLicenseNumber(nutritionist.getLicenseNumber());
-        entity.setSpecialization(nutritionist.getSpecialization());
-        entity.setWorkplace(nutritionist.getWorkplace());
+        entity.setCnpCode(nutritionist.getCnpCode());
+        entity.setSpecialty(nutritionist.getSpecialty());
+        entity.setLocation(nutritionist.getLocation());
+        entity.setAddress(nutritionist.getAddress());
+        entity.setMasterDegree(nutritionist.getMasterDegree());
+        entity.setOtherSpecialty(nutritionist.getOtherSpecialty());
+        entity.setAcceptTerms(nutritionist.isAcceptTerms());
         entity.setYearsOfExperience(nutritionist.getYearsOfExperience());
         entity.setBiography(nutritionist.getBiography());
+
+        // Imágenes de licencia
+        entity.setLicenseFrontImage(nutritionist.getLicenseFrontImage());
+        entity.setLicenseBackImage(nutritionist.getLicenseBackImage());
 
         return entity;
     }
@@ -122,6 +147,16 @@ public class UserMapper {
         entity.setLastName(user.getLastName());
         entity.setBirthDate(user.getBirthDate());
         entity.setPhone(user.getPhone());
+
+        // Imagen de perfil
+        entity.setProfileImage(user.getProfileImage());
+        entity.setImageContentType(user.getImageContentType());
+
+        // Estados de verificación
+        entity.setEmailVerified(user.isEmailVerified());
+        entity.setPhoneVerified(user.isPhoneVerified());
+        entity.setEmailVerifiedAt(user.getEmailVerifiedAt());
+        entity.setPhoneVerifiedAt(user.getPhoneVerifiedAt());
 
         // Establecer el tipo de usuario basado en la instancia
         if (user instanceof Patient) {

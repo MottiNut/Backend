@@ -26,6 +26,27 @@ public abstract class User {
     protected LocalDate birthDate;
     @Getter
     protected String phone;
+
+    @Getter
+    protected byte[] profileImage;
+
+    @Getter
+    protected String imageContentType;
+/// verificacion
+    @Getter
+    private boolean emailVerified = false;
+
+    @Getter
+    private boolean phoneVerified = false;
+
+    @Getter
+    private LocalDateTime emailVerifiedAt;
+
+    @Getter
+    private LocalDateTime phoneVerifiedAt;
+
+    /// ////////
+
     @Getter
     protected final LocalDateTime createdAt;
 
@@ -42,6 +63,11 @@ public abstract class User {
         this.createdAt = LocalDateTime.now();
     }
 
+    public void updateProfileImage(byte[] profileImage, String imageContentType) {
+        this.profileImage = profileImage;
+        this.imageContentType = imageContentType;
+    }
+
     public String getFullName() {
         return firstName + " " + lastName;
     }
@@ -51,4 +77,21 @@ public abstract class User {
         this.lastName = lastName;
         this.phone = phone;
     }
+
+    // Métodos para actualizar verificaciones
+    public void verifyEmail() {
+        this.emailVerified = true;
+        this.emailVerifiedAt = LocalDateTime.now();
+    }
+
+    public void verifyPhone() {
+        this.phoneVerified = true;
+        this.phoneVerifiedAt = LocalDateTime.now();
+    }
+
+    public boolean isFullyVerified() {
+        return emailVerified && (getRole().isPatient() || phoneVerified);
+    }
+
 }
+

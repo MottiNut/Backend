@@ -3,6 +3,9 @@ package com.mottinut.bff.patient.controller;
 import com.mottinut.bff.patient.dto.request.*;
 import com.mottinut.bff.patient.service.PatientBffService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -13,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -101,3 +105,4 @@ public class PatientBffController {
         return ResponseEntity.ok(progress);
     }
 }
+

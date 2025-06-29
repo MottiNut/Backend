@@ -38,4 +38,3 @@ public class RegisterPatientRequest {
     private String dietaryPreferences;
     private String gender;
 }
-

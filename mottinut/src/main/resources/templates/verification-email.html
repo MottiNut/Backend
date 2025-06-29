@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación de cuenta - <span th:text="${companyName}">MottiNut</span></title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f5f7fa;
+      padding: 20px;
+    }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px 30px;
+      text-align: center;
+      color: white;
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 0;
+    }
+
+    .content {
+      background: white;
+      padding: 50px 40px;
+    }
+
+    .greeting {
+      font-size: 24px;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .message {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 35px;
+      line-height: 1.8;
+    }
+
+    .code-container {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      margin: 35px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .code-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .code-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .verification-code {
+      font-size: 36px;
+      font-weight: bold;
+      color: white;
+      letter-spacing: 8px;
+      font-family: 'Courier New', monospace;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .expiration-notice {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px 20px;
+      margin: 30px 0;
+      border-radius: 5px;
+      font-size: 14px;
+      color: #856404;
+    }
+
+    .security-note {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 30px 0;
+      border-left: 4px solid #17a2b8;
+    }
+
+    .security-icon {
+      color: #17a2b8;
+      font-size: 20px;
+      margin-right: 10px;
+    }
+
+    .footer {
+      background: #2c3e50;
+      color: white;
+      padding: 30px 40px;
+      text-align: center;
+    }
+
+    .footer-content {
+      margin-bottom: 20px;
+    }
+
+    .footer-link {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-link:hover {
+      color: #2980b9;
+      text-decoration: underline;
+    }
+
+    .social-links {
+      margin-top: 20px;
+    }
+
+    .social-links a {
+      display: inline-block;
+      margin: 0 10px;
+      color: #bdc3c7;
+      font-size: 18px;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .social-links a:hover {
+      color: #3498db;
+    }
+
+    @media (max-width: 600px) {
+      .email-container {
+        margin: 10px;
+      }
+
+      .content {
+        padding: 30px 25px;
+      }
+
+      .header {
+        padding: 30px 25px;
+      }
+
+      .verification-code {
+        font-size: 28px;
+        letter-spacing: 4px;
+      }
+
+      .footer {
+        padding: 25px 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <div class="logo">🥗 MottiNut</div>
+    <div class="header-subtitle">Plataforma para Nutricionistas y Pacientes</div>
+  </div>
+
+  <div class="content">
+    <div class="greeting">¡Hola <span th:text="${username}">Usuario</span>! 👋</div>
+
+    <div class="message">
+      Bienvenido a <strong>MottiNut</strong>. Para completar tu registro y comenzar a disfrutar de todas nuestras funcionalidades, necesitas verificar tu dirección de correo electrónico.
+    </div>
+
+    <div class="code-container">
+      <div class="code-label">Tu código de verificación</div>
+      <div class="verification-code" th:text="${verificationCode}"> </div>
+    </div>
+
+    <div class="expiration-notice">
+      <strong>⏰ Importante:</strong> Este código expirará en <strong>10 minutos</strong> por motivos de seguridad.
+    </div>
+
+    <div class="security-note">
+      <span class="security-icon">🔒</span>
+      <strong>Nota de seguridad:</strong> Si no solicitaste esta verificación, puedes ignorar este correo de forma segura. Tu cuenta permanecerá protegida.
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-content">
+      <strong>El equipo de <span th:text="${companyName}">MottiNut</span></strong><br>
+      Transformando la nutrición, una consulta a la vez.
+    </div>
+
+    <div>
+      ¿Necesitas ayuda? <a href="mailto:soporte@mottinut.com" class="footer-link">Contáctanos</a>
+    </div>
+
+    <div class="social-links">
+      <a href="#" title="Facebook">📘</a>
+      <a href="#" title="Instagram">📷</a>
+      <a href="#" title="LinkedIn">💼</a>
+      <a href="#" title="Twitter">🐦</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -4,10 +4,17 @@ import jakarta.validation.ValidationException;
 import lombok.Getter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.regex.Pattern;
+
 @Getter
 public class Password {
     private final String hashedValue;
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    // Patrón para al menos 1 minúscula, 1 mayúscula, 1 dígito, 1 carácter especial, mínimo 6 caracteres
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{6,}$"
+    );
 
     private Password(String hashedValue) {
         this.hashedValue = hashedValue;
@@ -18,8 +25,8 @@ public class Password {
             throw new ValidationException("La contraseña no puede estar vacía");
         }
 
-        if (plainText.length() < 6) {
-            throw new ValidationException("La contraseña debe tener al menos 6 caracteres");
+        if (!PASSWORD_PATTERN.matcher(plainText).matches()) {
+            throw new ValidationException("La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y caracteres especiales");
         }
 
         String hashed = encoder.encode(plainText);

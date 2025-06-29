@@ -55,4 +55,10 @@ public class UserService {
         nutritionist.updateProfessionalProfile(yearsOfExperience, biography);
         return (Nutritionist) userRepository.save(nutritionist);
     }
+
+    public Nutritionist updateNutritionistProfileImage(UserId userId, byte[] imageData, String contentType) {
+        Nutritionist nutritionist = getNutritionistById(userId);
+        nutritionist.updateProfileImage(imageData, contentType);
+        return (Nutritionist) userRepository.save(nutritionist);
+    }
 }

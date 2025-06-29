@@ -4,7 +4,6 @@ import com.mottinut.auth.domain.valueobjects.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.usertype.UserType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "users")
-@Inheritance(strategy = InheritanceType.JOINED)  // Cambio clave aquí
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,6 +36,27 @@ public abstract class UserEntity {
 
     private String phone;
 
+    // Imagen de perfil - AQUÍ ESTÁ EL CAMBIO
+    @Lob
+    @Column(name = "profile_image", columnDefinition = "MEDIUMBLOB")
+    private byte[] profileImage;
+
+    @Column(name = "image_content_type")
+    private String imageContentType;
+
+    // Campos de verificación
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
+
+    @Column(name = "phone_verified")
+    private Boolean phoneVerified = false;
+
+    @Column(name = "email_verified_at")
+    private LocalDateTime emailVerifiedAt;
+
+    @Column(name = "phone_verified_at")
+    private LocalDateTime phoneVerifiedAt;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -50,4 +70,3 @@ public abstract class UserEntity {
         createdAt = LocalDateTime.now();
     }
 }
-

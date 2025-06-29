@@ -3,6 +3,7 @@ package com.mottinut.crosscutting.config;
 import com.mottinut.crosscutting.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,9 +28,32 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/bff/auth/register/patient", "/api/bff/auth/register/nutritionist", "/api/bff/auth/login", "/api/auth/health").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll() // Para desarrollo con H2
+                        // Endpoints de autenticación - permitir acceso sin autenticación
+                        .requestMatchers(HttpMethod.POST, "/api/bff/auth/register/patient").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/bff/auth/register/nutritionist").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/bff/auth/login").permitAll()
+
+                        // Endpoints de verificación - NUEVOS PERMISOS AGREGADOS
+                        .requestMatchers(HttpMethod.POST, "/api/bff/auth/verification/send").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/bff/auth/verification/verify").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/bff/auth/verification/resend").permitAll()
+
+                        // Endpoints de recuperación de contraseña
+                        .requestMatchers(HttpMethod.POST, "/api/bff/auth/password/reset-request").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/bff/auth/password/reset").permitAll()
+
+                        // Endpoints de salud y desarrollo
+                        .requestMatchers("/api/auth/health").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
+
+                        // H2 Console para desarrollo
+                        .requestMatchers("/h2-console/**").permitAll()
+
+                        // Swagger UI
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
+
+                        // Todos los demás endpoints requieren autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
