@@ -10,7 +10,7 @@ import java.util.Arrays;
 public enum ChronicDiseaseFilter {
     ALL("all", "Todos"),
     DIABETES("diabetes", "Diabetes"),
-    HYPERTENSION("hypertension", "Hipertensión"),
+    HYPERTENSION("hypertension", "Hipertension"),
     OBESITY("obesity", "Obesidad"),
     CARDIOVASCULAR("cardiovascular", "Cardiovascular"),
     NONE("none", "Sin enfermedad crónica");
