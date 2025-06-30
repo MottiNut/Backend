@@ -2,7 +2,6 @@ package com.mottinut.nutritionplan.domain.services;
 
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.UserService;
-import com.mottinut.notification.infrastructure.events.NutritionPlanStatusChangedEvent;
 import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
 import com.mottinut.nutritionplan.domain.enums.PatientAction;
 import com.mottinut.nutritionplan.domain.enums.ReviewAction;
@@ -32,8 +31,6 @@ public class NutritionPlanService {
     private final AiPlanGeneratorService aiPlanGeneratorService;
     private final UserService userService;
     private final MedicalHistoryRepository medicalHistoryRepository;
-    private static final Logger logger = LoggerFactory.getLogger(NutritionPlanService.class);
-    private final ApplicationEventPublisher eventPublisher; // Para publicar eventos
 
     public NutritionPlanService(NutritionPlanRepository nutritionPlanRepository,
                                 AiPlanGeneratorService aiPlanGeneratorService,
@@ -43,18 +40,15 @@ public class NutritionPlanService {
         this.aiPlanGeneratorService = aiPlanGeneratorService;
         this.userService = userService;
         this.medicalHistoryRepository = medicalHistoryRepository;
-        this.eventPublisher = eventPublisher;
     }
 
     private void validatePatientHasMedicalHistory(UserId patientId) {
         List<MedicalHistory> medicalHistories = medicalHistoryRepository.findByPatientId(new PatientId(patientId.getValue()));
 
         if (medicalHistories.isEmpty()) {
-            logger.error("Intento de generar plan nutricional sin historial médico para paciente: {}", patientId.getValue());
+
             throw new IllegalStateException("No se puede generar el plan nutricional. El paciente debe tener al menos un historial médico registrado por un nutricionista antes de generar su primer plan.");
         }
-
-        logger.info("Validación exitosa: Paciente {} tiene {} historiales médicos", patientId.getValue(), medicalHistories.size());
     }
 
     public NutritionPlan generatePlan(UserId nutritionistId, UserId patientId,
@@ -135,15 +129,12 @@ public class NutritionPlanService {
 
         if (action == ReviewAction.APPROVE) {
             plan.approve(reviewNotes);
-            // Publicar evento para que se envíe la notificación
-            eventPublisher.publishEvent(new NutritionPlanStatusChangedEvent(plan));
         } else {
             plan.reject(reviewNotes);
         }
 
         return nutritionPlanRepository.save(plan);
     }
-
     public NutritionPlan editPlan(UserId nutritionistId, NutritionPlanId planId,
                                   String newPlanContent, String reviewNotes) {
         // Verificar que el nutricionista existe

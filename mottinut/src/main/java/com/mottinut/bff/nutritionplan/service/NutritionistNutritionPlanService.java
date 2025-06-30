@@ -31,7 +31,7 @@ public class NutritionistNutritionPlanService {
     private final NutritionPlanService nutritionPlanService;
     private final UserService userService;
     private final ObjectMapper objectMapper;
-    private final NotificationService notificationService; // Agregar dependencia
+    private final NotificationService notificationService; // Agregar esta línea
 
 
     public NutritionistNutritionPlanService(NutritionPlanService nutritionPlanService,
@@ -86,21 +86,33 @@ public class NutritionistNutritionPlanService {
             NutritionPlanId nutritionPlanId = new NutritionPlanId(planId);
             ReviewAction action = ReviewAction.fromString(request.getAction());
 
-            NutritionPlan reviewedPlan = nutritionPlanService.reviewPlan(nutritionistId, nutritionPlanId, action, request.getReviewNotes());
+            NutritionPlan reviewedPlan = nutritionPlanService.reviewPlan(
+                    nutritionistId,
+                    nutritionPlanId,
+                    action,
+                    request.getReviewNotes()
+            );
 
-            // Enviar notificación si el plan fue aprobado
+            // Enviar notificación según la acción
+            User patient = userService.getUserById(reviewedPlan.getPatientId());
+
             if (action == ReviewAction.APPROVE) {
-                User patient = userService.getUserById(reviewedPlan.getPatientId());
-                User nutritionist = userService.getUserById(nutritionistId);
-
                 notificationService.sendPlanApprovedNotification(
-                        patient.getUserId(),
+                        reviewedPlan.getPatientId(),
                         patient.getFullName(),
-                        nutritionist.getFullName()
+                        planId
+                );
+            } else if (action == ReviewAction.REJECT) {
+                notificationService.sendPlanRejectedNotification(
+                        reviewedPlan.getPatientId(),
+                        patient.getFullName(),
+                        planId,
+                        request.getReviewNotes()
                 );
             }
 
             return buildPlanResponse(reviewedPlan);
+
         } catch (Exception e) {
             throw new RuntimeException("Error revisando el plan: " + e.getMessage(), e);
         }
