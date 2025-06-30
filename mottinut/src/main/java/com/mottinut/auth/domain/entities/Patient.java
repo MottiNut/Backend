@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 
+
 public class Patient extends User {
     @Getter
     private Double height;
@@ -24,8 +25,6 @@ public class Patient extends User {
     private String emergencyContact;
     @Getter
     private String gender;
-    @Getter private byte[] profileImage;
-    @Getter private String imageContentType;
 
     public Patient(UserId userId, Email email, Password password, String firstName, String lastName,
                    LocalDate birthDate, String phone, Double height, Double weight,
@@ -41,8 +40,11 @@ public class Patient extends User {
         this.dietaryPreferences = dietaryPreferences;
         this.emergencyContact = emergencyContact;
         this.gender = gender;
-        this.profileImage = profileImage;
-        this.imageContentType = imageContentType;
+
+        // ✅ Usar el método heredado de User para establecer la imagen
+        if (profileImage != null || imageContentType != null) {
+            this.updateProfileImage(profileImage, imageContentType);
+        }
     }
 
     public boolean hasMedicalCondition() {
@@ -60,11 +62,6 @@ public class Patient extends User {
         this.dietaryPreferences = dietaryPreferences;
         this.emergencyContact = emergencyContact;
         this.gender = gender;
-    }
-
-    public void updateProfileImage(byte[] profileImage, String imageContentType) {
-        this.profileImage = profileImage;
-        this.imageContentType = imageContentType;
     }
 
     public double calculateBMI() {

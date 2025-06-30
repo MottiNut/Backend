@@ -33,28 +33,17 @@ public class PatientEntity extends UserEntity {
     @Column(name = "gender")
     private String gender;
 
-    // Configuración más específica para la imagen
-    @Lob
-    @Basic(fetch = FetchType.LAZY) // Carga perezosa para optimizar performance
-    @Column(name = "profile_image", columnDefinition = "LONGBLOB")
-    private byte[] profileImage;
-
-    @Column(name = "image_content_type", length = 100)
-    private String imageContentType;
-
     @Override
     protected void onCreate() {
         super.onCreate();
         setUserType(Role.PATIENT);
     }
 
-    // Método auxiliar para verificar si tiene imagen
     public boolean hasProfileImage() {
-        return profileImage != null && profileImage.length > 0;
+        return getProfileImage() != null && getProfileImage().length > 0;
     }
 
-    // Método auxiliar para obtener el tamaño de la imagen
     public long getProfileImageSize() {
-        return profileImage != null ? profileImage.length : 0;
+        return getProfileImage() != null ? getProfileImage().length : 0;
     }
 }
