@@ -1,6 +1,5 @@
 package com.mottinut.auth.domain.entities;
 
-import com.mottinut.auth.domain.valueobjects.LicenseNumber;
 import com.mottinut.auth.domain.valueobjects.Password;
 import com.mottinut.auth.domain.valueobjects.Role;
 import com.mottinut.shared.domain.valueobjects.Email;

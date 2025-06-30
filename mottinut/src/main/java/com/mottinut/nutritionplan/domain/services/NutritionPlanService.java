@@ -2,6 +2,7 @@ package com.mottinut.nutritionplan.domain.services;
 
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.UserService;
+import com.mottinut.notification.infrastructure.events.NutritionPlanStatusChangedEvent;
 import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
 import com.mottinut.nutritionplan.domain.enums.PatientAction;
 import com.mottinut.nutritionplan.domain.enums.ReviewAction;
@@ -15,6 +16,7 @@ import com.mottinut.shared.domain.exceptions.UnauthorizedException;
 import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.UserId;
 import jakarta.transaction.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +33,17 @@ public class NutritionPlanService {
     private final UserService userService;
     private final MedicalHistoryRepository medicalHistoryRepository;
     private static final Logger logger = LoggerFactory.getLogger(NutritionPlanService.class);
+    private final ApplicationEventPublisher eventPublisher; // Para publicar eventos
 
     public NutritionPlanService(NutritionPlanRepository nutritionPlanRepository,
                                 AiPlanGeneratorService aiPlanGeneratorService,
                                 UserService userService,
-                                MedicalHistoryRepository medicalHistoryRepository) {
+                                MedicalHistoryRepository medicalHistoryRepository, ApplicationEventPublisher eventPublisher) {
         this.nutritionPlanRepository = nutritionPlanRepository;
         this.aiPlanGeneratorService = aiPlanGeneratorService;
         this.userService = userService;
         this.medicalHistoryRepository = medicalHistoryRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     private void validatePatientHasMedicalHistory(UserId patientId) {
@@ -131,6 +135,8 @@ public class NutritionPlanService {
 
         if (action == ReviewAction.APPROVE) {
             plan.approve(reviewNotes);
+            // Publicar evento para que se envíe la notificación
+            eventPublisher.publishEvent(new NutritionPlanStatusChangedEvent(plan));
         } else {
             plan.reject(reviewNotes);
         }

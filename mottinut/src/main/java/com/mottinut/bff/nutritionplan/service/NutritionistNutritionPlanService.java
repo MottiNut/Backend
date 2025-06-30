@@ -8,6 +8,7 @@ import com.mottinut.bff.nutritionplan.dto.request.*;
 import com.mottinut.bff.nutritionplan.dto.response.NutritionPlanResponseDto;
 import com.mottinut.bff.nutritionplan.dto.response.PendingPlanResponseDto;
 import com.mottinut.crosscutting.security.CustomUserPrincipal;
+import com.mottinut.notification.domain.services.NotificationService;
 import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
 import com.mottinut.nutritionplan.domain.enums.ReviewAction;
 import com.mottinut.nutritionplan.domain.services.NutritionPlanService;
@@ -30,13 +31,16 @@ public class NutritionistNutritionPlanService {
     private final NutritionPlanService nutritionPlanService;
     private final UserService userService;
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService; // Agregar dependencia
+
 
     public NutritionistNutritionPlanService(NutritionPlanService nutritionPlanService,
                                             UserService userService,
-                                            ObjectMapper objectMapper) {
+                                            ObjectMapper objectMapper, NotificationService notificationService) {
         this.nutritionPlanService = nutritionPlanService;
         this.userService = userService;
         this.objectMapper = objectMapper;
+        this.notificationService = notificationService;
     }
 
     public NutritionPlanResponseDto generatePlan(GeneratePlanRequestDto request, Authentication authentication) {
@@ -82,8 +86,19 @@ public class NutritionistNutritionPlanService {
             NutritionPlanId nutritionPlanId = new NutritionPlanId(planId);
             ReviewAction action = ReviewAction.fromString(request.getAction());
 
-            NutritionPlan reviewedPlan = nutritionPlanService.reviewPlan(
-                    nutritionistId, nutritionPlanId, action, request.getReviewNotes());
+            NutritionPlan reviewedPlan = nutritionPlanService.reviewPlan(nutritionistId, nutritionPlanId, action, request.getReviewNotes());
+
+            // Enviar notificación si el plan fue aprobado
+            if (action == ReviewAction.APPROVE) {
+                User patient = userService.getUserById(reviewedPlan.getPatientId());
+                User nutritionist = userService.getUserById(nutritionistId);
+
+                notificationService.sendPlanApprovedNotification(
+                        patient.getUserId(),
+                        patient.getFullName(),
+                        nutritionist.getFullName()
+                );
+            }
 
             return buildPlanResponse(reviewedPlan);
         } catch (Exception e) {
