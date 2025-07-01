@@ -1,36 +1,84 @@
 package com.mottinut.notification.domain.entities;
 
-import jakarta.persistence.*;
+import com.mottinut.notification.domain.valueobjects.DeviceToken;
+import com.mottinut.notification.domain.valueobjects.Platform;
+import com.mottinut.shared.domain.valueobjects.UserId;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@Entity
-@Table(name = "user_device_tokens")
+@Builder
 public class UserDeviceToken {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private final Long id;
+    private final UserId userId;
+    private final DeviceToken deviceToken;
+    private final Platform platform;
+    private final boolean isActive;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
+    private final LocalDateTime lastUsedAt;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
-    @Column(name = "device_token", nullable = false, unique = true)
-    private String deviceToken;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-
-    public UserDeviceToken(Long userId, String deviceToken) {
-        this.userId = userId;
-        this.deviceToken = deviceToken;
+    // Lógica de negocio
+    public boolean isValid() {
+        return isActive && deviceToken != null && !deviceToken.getValue().trim().isEmpty();
     }
 
-    public UserDeviceToken() {
+    public boolean hasBeenUsedRecently() {
+        if (lastUsedAt == null) return false;
+        return lastUsedAt.isAfter(LocalDateTime.now().minusDays(30));
+    }
 
+    public boolean isExpired() {
+        if (lastUsedAt == null) return false;
+        return lastUsedAt.isBefore(LocalDateTime.now().minusDays(90));
+    }
+
+    public boolean belongsToUser(UserId userId) {
+        return this.userId.equals(userId);
+    }
+
+    public boolean supportsRichNotifications() {
+        return platform == Platform.IOS || platform == Platform.ANDROID;
+    }
+
+    public UserDeviceToken markAsUsed() {
+        return UserDeviceToken.builder()
+                .id(this.id)
+                .userId(this.userId)
+                .deviceToken(this.deviceToken)
+                .platform(this.platform)
+                .isActive(this.isActive)
+                .createdAt(this.createdAt)
+                .updatedAt(LocalDateTime.now())
+                .lastUsedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public UserDeviceToken deactivate() {
+        return UserDeviceToken.builder()
+                .id(this.id)
+                .userId(this.userId)
+                .deviceToken(this.deviceToken)
+                .platform(this.platform)
+                .isActive(false)
+                .createdAt(this.createdAt)
+                .updatedAt(LocalDateTime.now())
+                .lastUsedAt(this.lastUsedAt)
+                .build();
+    }
+
+    public UserDeviceToken updateToken(DeviceToken newToken) {
+        return UserDeviceToken.builder()
+                .id(this.id)
+                .userId(this.userId)
+                .deviceToken(newToken)
+                .platform(this.platform)
+                .isActive(this.isActive)
+                .createdAt(this.createdAt)
+                .updatedAt(LocalDateTime.now())
+                .lastUsedAt(this.lastUsedAt)
+                .build();
     }
 }
