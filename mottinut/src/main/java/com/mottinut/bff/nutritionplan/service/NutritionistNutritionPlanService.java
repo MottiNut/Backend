@@ -84,14 +84,10 @@ public class NutritionistNutritionPlanService {
 
             NutritionPlan reviewedPlan = nutritionPlanService.reviewPlan(nutritionistId, nutritionPlanId, action, request.getReviewNotes());
             User patient = userService.getUserById(reviewedPlan.getPatientId());
-
             // Enviar notificaciones usando el nuevo servicio
             if (action == ReviewAction.APPROVE) {
                 sendPlanApprovedNotification(reviewedPlan.getPatientId(), patient.getFullName(), planId);
-            } else if (action == ReviewAction.REJECT) {
-                sendPlanRejectedNotification(reviewedPlan.getPatientId(), patient.getFullName(), planId, request.getReviewNotes());
             }
-
             return buildPlanResponse(reviewedPlan);
         } catch (Exception e) {
             throw new RuntimeException("Error revisando el plan: " + e.getMessage(), e);
@@ -139,26 +135,6 @@ public class NutritionistNutritionPlanService {
         } catch (Exception e) {
             // Log del error pero no fallar la operación principal
             System.err.println("Error enviando notificación de plan aprobado: " + e.getMessage());
-        }
-    }
-
-    private void sendPlanRejectedNotification(UserId patientId, String patientName, Long planId, String reviewNotes) {
-        try {
-            NotificationContent content = NotificationContent.builder()
-                    .title("Plan Nutricional Requiere Revisión")
-                    .body(String.format("Tu plan nutricional necesita ajustes. Revisa los comentarios del nutricionista."))
-                    .data(java.util.Map.of(
-                            "type", "PLAN_REJECTED",
-                            "planId", planId.toString(),
-                            "patientName", patientName,
-                            "reviewNotes", reviewNotes != null ? reviewNotes : ""
-                    ))
-                    .build();
-
-            notificationDomainService.sendNotification(patientId, content);
-        } catch (Exception e) {
-            // Log del error pero no fallar la operación principal
-            System.err.println("Error enviando notificación de plan rechazado: " + e.getMessage());
         }
     }
 
