@@ -32,6 +32,9 @@ public class NotificationService {
         }
 
         try {
+            // ✅ Log para debugging
+            System.out.println("🔥 Intentando enviar notificación...");
+            System.out.println("📱 Device token: " + deviceToken);
             Notification notification = Notification.builder()
                     .setTitle("¡Plan Nutricional Aprobado!")
                     .setBody("Tu plan nutricional ha sido aprobado por el nutricionista")
@@ -53,6 +56,8 @@ public class NotificationService {
 
         } catch (Exception e) {
             logger.error("Error sending notification to patient {}: {}", patientId.getValue(), e.getMessage(), e);
+            System.err.println("❌ Error enviando notificación: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

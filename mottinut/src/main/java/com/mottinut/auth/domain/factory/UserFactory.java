@@ -12,13 +12,25 @@ import java.time.LocalDate;
 @Component
 public class UserFactory {
 
+    // ✅ Método principal con imagen
+    public Patient createPatient(UserId userId, Email email, Password password, String firstName,
+                                 String lastName, LocalDate birthDate, String phone, Double height,
+                                 Double weight, boolean hasMedicalCondition, String chronicDisease,
+                                 String allergies, String dietaryPreferences, String gender,
+                                 byte[] profileImage, String imageContentType) {
+        return new Patient(userId, email, password, firstName, lastName, birthDate, phone,
+                height, weight, hasMedicalCondition, chronicDisease, allergies,
+                dietaryPreferences, null, gender, profileImage, imageContentType);
+    }
+
+    // ✅ Método sobrecargado sin imagen (para casos donde no se proporciona imagen)
     public Patient createPatient(UserId userId, Email email, Password password, String firstName,
                                  String lastName, LocalDate birthDate, String phone, Double height,
                                  Double weight, boolean hasMedicalCondition, String chronicDisease,
                                  String allergies, String dietaryPreferences, String gender) {
-        return new Patient(userId, email, password, firstName, lastName, birthDate, phone,
+        return createPatient(userId, email, password, firstName, lastName, birthDate, phone,
                 height, weight, hasMedicalCondition, chronicDisease, allergies,
-                dietaryPreferences, null, gender, null, null); // nulls para imagen
+                dietaryPreferences, gender, null, null);
     }
 
     public Nutritionist createNutritionist(UserId userId, Email email, Password password,
@@ -27,7 +39,7 @@ public class UserFactory {
                                            byte[] profileImage, String profileImageContentType,
                                            byte[] licenseFrontImage, byte[] licenseBackImage) {
 
-        LocalDate defaultBirthDate = LocalDate.now().minusYears(25); // Fecha por defecto
+        LocalDate defaultBirthDate = LocalDate.now().minusYears(25);
 
         return new Nutritionist(
                 userId,
@@ -35,7 +47,7 @@ public class UserFactory {
                 password,
                 firstName,
                 lastName,
-                defaultBirthDate, // Usando fecha por defecto
+                defaultBirthDate,
                 phone,
                 profileImage,
                 profileImageContentType,
@@ -43,11 +55,11 @@ public class UserFactory {
                 licenseFrontImage,
                 licenseBackImage,
                 specialty,
-                null, // masterDegree - será null por defecto
-                null, // otherSpecialty - será null por defecto
+                null, // masterDegree
+                null, // otherSpecialty
                 location,
-                null, // address - será null por defecto, aunque el constructor lo requiere
-                true  // acceptTerms - será true por defecto
+                null, // address
+                true  // acceptTerms
         );
     }
 
