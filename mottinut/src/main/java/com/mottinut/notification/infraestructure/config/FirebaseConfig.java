@@ -33,7 +33,7 @@ public class FirebaseConfig {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
                 InputStream serviceAccountStream = new ByteArrayInputStream(
-                        firebaseServiceAccountJson.getBytes(StandardCharsets.UTF_8)
+                        firebaseServiceAccountJson.replace("\\n", "\n").getBytes(StandardCharsets.UTF_8)
                 );
 
                 FirebaseOptions options = FirebaseOptions.builder()
