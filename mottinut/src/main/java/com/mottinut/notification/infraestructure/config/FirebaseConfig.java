@@ -15,39 +15,33 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
 public class FirebaseConfig {
 
-    @Value("${firebase.service-account-json}")
-    private String firebaseServiceAccountJson;
+    @Value("${firebase.service-account-key-path:firebase-service-account-key.json}")
+    private String serviceAccountKeyPath;
 
     @PostConstruct
     public void initialize() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                InputStream serviceAccountStream = new ByteArrayInputStream(
-                        firebaseServiceAccountJson.replace("\\n", "\n").getBytes(StandardCharsets.UTF_8)
-                );
-
+                InputStream serviceAccount = new ClassPathResource(serviceAccountKeyPath).getInputStream();
                 FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .build();
                 FirebaseApp.initializeApp(options);
-                log.info("✅ Firebase initialized successfully from ENV variable");
+                log.info("Firebase initialized successfully");
             }
         } catch (IOException e) {
-            log.error("❌ Error initializing Firebase: {}", e.getMessage(), e);
+            log.error("Error initializing Firebase: {}", e.getMessage(), e);
             throw new RuntimeException("Error initializing Firebase", e);
         }
     }
-
 
     @Bean
     public FirebaseMessaging firebaseMessaging() {
