@@ -14,7 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-
+import java.io.ByteArrayInputStream;
+import java.util.Base64;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -23,19 +24,26 @@ import java.io.InputStream;
 @Slf4j
 public class FirebaseConfig {
 
-    @Value("${firebase.service-account-key-path:firebase-service-account-key.json}")
-    private String serviceAccountKeyPath;
+    @Value("${firebase.credentials-json-base64:}")
+    private String firebaseCredentialsBase64;
 
     @PostConstruct
     public void initialize() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                InputStream serviceAccount = new ClassPathResource(serviceAccountKeyPath).getInputStream();
-                FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .build();
-                FirebaseApp.initializeApp(options);
-                log.info("Firebase initialized successfully");
+                if (firebaseCredentialsBase64 == null || firebaseCredentialsBase64.isBlank()) {
+                    throw new IllegalStateException("Firebase credentials base64 is not set.");
+                }
+
+                byte[] decodedBytes = Base64.getDecoder().decode(firebaseCredentialsBase64);
+                try (InputStream serviceAccount = new ByteArrayInputStream(decodedBytes)) {
+                    FirebaseOptions options = FirebaseOptions.builder()
+                            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                            .build();
+
+                    FirebaseApp.initializeApp(options);
+                    log.info("Firebase initialized successfully from base64 credentials");
+                }
             }
         } catch (IOException e) {
             log.error("Error initializing Firebase: {}", e.getMessage(), e);
