@@ -1,4 +1,5 @@
 package com.mottinut.notification.infraestructure.persistence.repositories;
+
 import com.mottinut.notification.domain.entities.UserDeviceToken;
 import com.mottinut.notification.domain.repository.DeviceTokenRepository;
 import com.mottinut.notification.domain.valueobjects.DeviceToken;
@@ -41,22 +42,37 @@ public class JpaDeviceTokenRepository implements DeviceTokenRepository {
 
     @Override
     public void save(UserId userId, DeviceToken deviceToken) {
-        Optional<UserDeviceToken> existing = jpaRepository.findByUserIdAndIsActiveTrue(userId.getValue())
-                .map(mapper::toDomainObject);
+        // Buscar si ya existe un token con ese valor (independientemente del usuario)
+        Optional<UserDeviceTokenEntity> existingByToken = jpaRepository.findByDeviceToken(deviceToken.getValue());
 
-        if (existing.isPresent()) {
-            UserDeviceToken updated = existing.get()
-                    .updateToken(deviceToken)
-                    .markAsUsed();
-            jpaRepository.save(mapper.toEntity(updated));
+        if (existingByToken.isPresent()) {
+            // Si existe, actualizar ese registro con el nuevo usuario
+            UserDeviceTokenEntity entity = existingByToken.get();
+            entity.setUserId(userId.getValue());
+            entity.setIsActive(true);
+            entity.setUpdatedAt(LocalDateTime.now());
+            entity.setLastUsedAt(LocalDateTime.now());
+            entity.setPlatform(deviceToken.getPlatform());
+            jpaRepository.save(entity);
         } else {
-            UserDeviceToken newToken = UserDeviceToken.builder()
-                    .userId(userId)
-                    .deviceToken(deviceToken)
-                    .platform(deviceToken.getPlatform())
-                    .isActive(true)
-                    .build();
-            jpaRepository.save(mapper.toEntity(newToken));
+            // Si no existe, buscar si el usuario ya tiene un token activo
+            Optional<UserDeviceToken> existing = jpaRepository.findByUserIdAndIsActiveTrue(userId.getValue())
+                    .map(mapper::toDomainObject);
+
+            if (existing.isPresent()) {
+                // Actualizar el token existente del usuario
+                UserDeviceToken updated = existing.get().updateToken(deviceToken).markAsUsed();
+                jpaRepository.save(mapper.toEntity(updated));
+            } else {
+                // Crear nuevo token
+                UserDeviceToken newToken = UserDeviceToken.builder()
+                        .userId(userId)
+                        .deviceToken(deviceToken)
+                        .platform(deviceToken.getPlatform())
+                        .isActive(true)
+                        .build();
+                jpaRepository.save(mapper.toEntity(newToken));
+            }
         }
     }
 
@@ -72,9 +88,7 @@ public class JpaDeviceTokenRepository implements DeviceTokenRepository {
 
     @Override
     public void markAsInvalid(UserId userId, DeviceToken deviceToken) {
-        jpaRepository.findByUserIdAndDeviceTokenAndIsActiveTrue(
-                        userId.getValue(),
-                        deviceToken.getValue())
+        jpaRepository.findByUserIdAndDeviceTokenAndIsActiveTrue(userId.getValue(), deviceToken.getValue())
                 .map(mapper::toDomainObject)
                 .ifPresent(domainToken -> {
                     UserDeviceToken deactivated = domainToken.deactivate();
@@ -94,22 +108,21 @@ public class JpaDeviceTokenRepository implements DeviceTokenRepository {
                 .map(UserDeviceToken::getDeviceToken);
     }
 
-
     @Override
     public void deactivateAllByUser(UserId userId) {
         List<UserDeviceTokenEntity> tokens = jpaRepository.findAllByUserIdAndIsActiveTrue(userId.getValue());
         tokens.forEach(entity -> {
-            UserDeviceToken domain = mapper.toDomainObject(entity).deactivate();
-            jpaRepository.save(mapper.toEntity(domain));
+            entity.setIsActive(false);
+            entity.setUpdatedAt(LocalDateTime.now());
+            jpaRepository.save(entity);
         });
-
     }
 
     @Override
     public void reactivate(UserId userId, DeviceToken token) {
         Optional<UserDeviceTokenEntity> entityOpt = jpaRepository.findByDeviceToken(token.getValue());
-
         entityOpt.ifPresent(entity -> {
+            entity.setUserId(userId.getValue()); // Asignar al nuevo usuario
             entity.setIsActive(true);
             entity.setLastUsedAt(LocalDateTime.now());
             entity.setUpdatedAt(LocalDateTime.now());
@@ -122,6 +135,4 @@ public class JpaDeviceTokenRepository implements DeviceTokenRepository {
         return jpaRepository.findByDeviceToken(value)
                 .map(mapper::toDomainObject);
     }
-
-
 }

@@ -55,37 +55,28 @@ public class NotificationDomainService {
 
     public void registerDeviceToken(UserId userId, DeviceToken deviceToken) {
         try {
-            Optional<UserDeviceToken> existing = deviceTokenRepository.findFullByValue(deviceToken.getValue());
+            Optional<UserDeviceToken> existingToken = deviceTokenRepository.findFullByValue(deviceToken.getValue());
 
-            if (existing.isPresent()) {
-                UserDeviceToken existingToken = existing.get();
-
-                if (existingToken.getUserId().equals(userId)) {
-                    // El token ya pertenece al usuario actual, solo reactivar
-                    deviceTokenRepository.reactivate(userId, deviceToken);
-                    log.info("Device token reactivado para user: {}", userId.getValue());
-                } else {
-                    // El token pertenece a otro usuario, reasignar al usuario actual
+            if (existingToken.isPresent()) {
+                UserDeviceToken existing = existingToken.get();
+                if (!existing.getUserId().equals(userId)) {
                     log.info("Reasignando device token del usuario {} al usuario {}",
-                            existingToken.getUserId().getValue(), userId.getValue());
-
-                    // Desactivar el token del usuario anterior
-                    deviceTokenRepository.markAsInvalid(existingToken.getUserId(), deviceToken);
-
-                    // Desactivar todos los tokens del usuario actual (por si tenía otros)
-                    deviceTokenRepository.deactivateAllByUser(userId);
-
-                    // Registrar el token para el nuevo usuario
-                    deviceTokenRepository.save(userId, deviceToken);
-
-                    log.info("Device token reasignado exitosamente al usuario: {}", userId.getValue());
+                            existing.getUserId().getValue(), userId.getValue());
+                } else {
+                    log.info("Reactivando device token para el usuario: {}", userId.getValue());
                 }
             } else {
-                // Token completamente nuevo
-                deviceTokenRepository.deactivateAllByUser(userId);
-                deviceTokenRepository.save(userId, deviceToken);
-                log.info("Device token registrado para user: {}", userId.getValue());
+                log.info("Registrando nuevo device token para el usuario: {}", userId.getValue());
             }
+
+            // Desactivar todos los tokens del usuario actual (evita duplicados)
+            deviceTokenRepository.deactivateAllByUser(userId);
+
+            // Guardar/actualizar el token (el repositorio maneja la reasignación)
+            deviceTokenRepository.save(userId, deviceToken);
+
+            log.info("Device token procesado exitosamente para el usuario: {}", userId.getValue());
+
         } catch (Exception e) {
             log.error("Error registering device token for user {}: {}", userId.getValue(), e.getMessage(), e);
             throw new DeviceTokenRegistrationException("Failed to register device token", e);
