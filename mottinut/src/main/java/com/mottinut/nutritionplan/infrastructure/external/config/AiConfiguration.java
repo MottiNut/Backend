@@ -30,7 +30,7 @@ public class AiConfiguration {
         return restTemplate;
     }
 
-    @Bean
+    @Bean(name = "aiObjectMapper")
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
