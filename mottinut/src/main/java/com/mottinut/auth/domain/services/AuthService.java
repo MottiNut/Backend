@@ -1,9 +1,5 @@
 package com.mottinut.auth.domain.services;
 
-import com.mottinut.auth.domain.emalServices.enums.VerificationType;
-import com.mottinut.auth.domain.emalServices.requestCode.ResendCodeRequest;
-import com.mottinut.auth.domain.emalServices.requestCode.VerifyCodeRequest;
-import com.mottinut.auth.domain.emalServices.responsiveStatus.VerificationStatusResponse;
 import com.mottinut.auth.domain.emalServices.services.VerificationService;
 import com.mottinut.auth.domain.entities.Nutritionist;
 import com.mottinut.auth.domain.entities.Patient;
@@ -11,25 +7,13 @@ import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.factory.UserFactory;
 import com.mottinut.auth.domain.repositories.UserRepository;
 import com.mottinut.auth.domain.valueobjects.Password;
-import com.mottinut.auth.domain.valueobjects.Token;
-import com.mottinut.bff.auth.dto.request.*;
-import com.mottinut.bff.auth.dto.response.AuthResponse;
-import com.mottinut.bff.auth.dto.response.NutritionistProfileResponse;
-import com.mottinut.bff.auth.dto.response.PatientProfileResponse;
-import com.mottinut.bff.auth.dto.response.UserProfileResponse;
-import com.mottinut.crosscutting.security.JwtTokenProvider;
 import com.mottinut.shared.domain.exceptions.BusinessException;
+import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.Email;
 import com.mottinut.shared.domain.valueobjects.UserId;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Transactional

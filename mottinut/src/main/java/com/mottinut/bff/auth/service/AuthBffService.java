@@ -23,6 +23,8 @@ import com.mottinut.shared.domain.valueobjects.Email;
 import com.mottinut.shared.domain.valueobjects.UserId;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -63,10 +65,10 @@ public class AuthBffService {
                     .requiresVerification(!user.isFullyVerified())
                     .message(user.isFullyVerified() ? "Inicio de sesión exitoso" : "Debes completar la verificación")
                     .build();
-        } catch (com.mottinut.shared.domain.exceptions.ValidationException e) {
+        } catch (ValidationException e) {
             if (e.getMessage().contains("verificar tu email")) {
                 // Usuario existe pero no está verificado
-                throw new com.mottinut.shared.domain.exceptions.ValidationException("Tu cuenta no está verificada. Por favor verifica tu email antes de continuar.");
+                throw new ValidationException("Tu cuenta no está verificada. Por favor verifica tu email antes de continuar.");
             }
             throw e;
         }
