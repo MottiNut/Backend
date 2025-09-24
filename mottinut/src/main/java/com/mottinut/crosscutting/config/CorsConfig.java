@@ -18,6 +18,9 @@ public class CorsConfig {
 
         // Permitir orígenes específicos (cambiar en producción)
         configuration.setAllowedOriginPatterns(List.of("*"));
+        // configuration.setAllowedOrigins(List.of(
+        //            "https://mottinut-backend-2025-djf0f5c0hjckhpgp.centralus-01.azurewebsites.net"
+        //        ));
 
         // Permitir métodos HTTP
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

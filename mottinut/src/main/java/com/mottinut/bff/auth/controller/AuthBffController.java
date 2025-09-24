@@ -12,8 +12,10 @@ import com.mottinut.bff.auth.dto.response.PatientProfileResponse;
 import com.mottinut.bff.auth.dto.response.UserProfileResponse;
 import com.mottinut.bff.auth.service.AuthBffService;
 import com.mottinut.crosscutting.security.CustomUserPrincipal;
+import com.mottinut.shared.domain.exceptions.NotFoundException;
 import com.mottinut.shared.domain.exceptions.ValidationException;
 import com.mottinut.shared.domain.valueobjects.UserId;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -275,5 +277,108 @@ public class AuthBffController {
                 contentType.equals("image/png") ||
                 contentType.equals("image/gif");
     }
+
+
+    /*Share profile*/
+    @PostMapping("/share/generate-link")
+    public ResponseEntity<Map<String, String>> generateShareLink(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            HttpServletRequest request) {
+
+        log.info("Generando enlace de compartir para usuario: {}", principal.getUser().getUserId().getValue());
+
+        // Construir URL base dinámicamente
+        String baseUrl = request.getScheme() + "://" + request.getServerName();
+        if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+            baseUrl += ":" + request.getServerPort();
+        }
+
+        Map<String, String> shareLinks = authBffService.generateShareLink(principal.getUser(), baseUrl);
+
+        return ResponseEntity.ok(shareLinks);
+    }
+
+    @GetMapping("/share/patient/{userId}")
+    public ResponseEntity<Map<String, Object>> getSharedPatientProfile(
+            @PathVariable Long userId,
+            HttpServletRequest request) {
+
+        try {
+            log.info("Accediendo a perfil compartido de paciente: {}", userId);
+
+            Map<String, Object> profileData = authBffService.getPublicPatientProfile(new UserId(userId));
+
+            return ResponseEntity.ok(profileData);
+        } catch (ValidationException e) {
+            log.warn("Perfil de paciente privado o no encontrado: {}", userId);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", e.getMessage(), "success", false));
+        } catch (Exception e) {
+            log.error("Error obteniendo perfil compartido de paciente: {}", userId, e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/share/nutritionist/{userId}")
+    public ResponseEntity<Map<String, Object>> getSharedNutritionistProfile(
+            @PathVariable Long userId,
+            HttpServletRequest request) {
+
+        try {
+            log.info("Accediendo a perfil compartido de nutricionista: {}", userId);
+
+            Map<String, Object> profileData = authBffService.getPublicNutritionistProfile(new UserId(userId));
+
+            return ResponseEntity.ok(profileData);
+        } catch (ValidationException e) {
+            log.warn("Perfil de nutricionista privado o no encontrado: {}", userId);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", e.getMessage(), "success", false));
+        } catch (Exception e) {
+            log.error("Error obteniendo perfil compartido de nutricionista: {}", userId, e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/share/resolve/{shortCode}")
+    public ResponseEntity<Map<String, Object>> resolveShortCode(
+            @PathVariable String shortCode,
+            HttpServletRequest request) {
+
+        try {
+            log.info("Resolviendo código corto: {}", shortCode);
+
+            // Obtener información del request para analytics
+            String ipAddress = getClientIpAddress(request);
+            String userAgent = request.getHeader("User-Agent");
+            String referrer = request.getHeader("Referer");
+
+            Map<String, Object> resolveData = authBffService.resolveShareCode(shortCode, ipAddress, userAgent, referrer);
+
+            return ResponseEntity.ok(resolveData);
+        } catch (ValidationException e) {
+            log.warn("Código inválido o expirado: {}", shortCode);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage(), "success", false));
+        } catch (NotFoundException e) {
+            log.warn("Código no encontrado: {}", shortCode);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage(), "success", false));
+        } catch (Exception e) {
+            log.error("Error resolviendo código corto: {}", shortCode, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error interno del servidor", "success", false));
+        }
+    }
+
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0];
+    }
+
+
 }
 

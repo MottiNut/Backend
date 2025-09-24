@@ -2,6 +2,10 @@ package com.mottinut.nutritionplan.domain.services;
 
 import com.mottinut.auth.domain.entities.User;
 import com.mottinut.auth.domain.services.UserService;
+import com.mottinut.notification.domain.services.NotificationDomainService;
+import com.mottinut.notification.domain.services.NutritionistNotificationService;
+import com.mottinut.notification.domain.valueobjects.NotificationContent;
+import com.mottinut.notification.events.PatientPlanActionEvent;
 import com.mottinut.nutritionplan.domain.entities.NutritionPlan;
 import com.mottinut.nutritionplan.domain.enums.PatientAction;
 import com.mottinut.nutritionplan.domain.enums.ReviewAction;
@@ -31,15 +35,24 @@ public class NutritionPlanService {
     private final AiPlanGeneratorService aiPlanGeneratorService;
     private final UserService userService;
     private final MedicalHistoryRepository medicalHistoryRepository;
+    private final NutritionistNotificationService nutritionistNotificationService;
+    private final NotificationDomainService notificationDomainService; // NUEVO
+    private final ApplicationEventPublisher eventPublisher;
 
     public NutritionPlanService(NutritionPlanRepository nutritionPlanRepository,
                                 AiPlanGeneratorService aiPlanGeneratorService,
                                 UserService userService,
-                                MedicalHistoryRepository medicalHistoryRepository, ApplicationEventPublisher eventPublisher) {
+                                MedicalHistoryRepository medicalHistoryRepository,
+                                ApplicationEventPublisher eventPublisher,
+                                NutritionistNotificationService nutritionistNotificationService,
+                                NotificationDomainService notificationDomainService) {
         this.nutritionPlanRepository = nutritionPlanRepository;
         this.aiPlanGeneratorService = aiPlanGeneratorService;
         this.userService = userService;
         this.medicalHistoryRepository = medicalHistoryRepository;
+        this.eventPublisher = eventPublisher;
+        this.nutritionistNotificationService = nutritionistNotificationService;
+        this.notificationDomainService = notificationDomainService; // NUEVO
     }
 
     private void validatePatientHasMedicalHistory(UserId patientId) {
@@ -133,8 +146,35 @@ public class NutritionPlanService {
             plan.reject(reviewNotes);
         }
 
-        return nutritionPlanRepository.save(plan);
+        NutritionPlan savedPlan = nutritionPlanRepository.save(plan);
+
+        // NUEVO: Notificar al paciente si el plan es aprobado
+        if (action == ReviewAction.APPROVE) {
+            notifyPatientAboutPlanApproval(savedPlan, nutritionist);
+        }
+
+        return savedPlan;
     }
+
+    private void notifyPatientAboutPlanApproval(NutritionPlan plan, User nutritionist) {
+        try {
+            NotificationContent content = NotificationContent.planApproved(
+                    plan.getPlanId().getValue(),
+                    plan.getPatientId()
+            );
+
+            notificationDomainService.sendNotification(plan.getPatientId(), content);
+
+            LoggerFactory.getLogger(NutritionPlanService.class)
+                    .info("Notificación de plan aprobado enviada al paciente: {}", plan.getPatientId().getValue());
+
+        } catch (Exception e) {
+            // Loggear error pero no interrumpir el flujo principal
+            LoggerFactory.getLogger(NutritionPlanService.class)
+                    .error("Error enviando notificación al paciente: {}", e.getMessage(), e);
+        }
+    }
+
     public NutritionPlan editPlan(UserId nutritionistId, NutritionPlanId planId,
                                   String newPlanContent, String reviewNotes) {
         // Verificar que el nutricionista existe
@@ -183,7 +223,42 @@ public class NutritionPlanService {
             plan.rejectByPatient(feedback);
         }
 
-        return nutritionPlanRepository.save(plan);
+        NutritionPlan savedPlan = nutritionPlanRepository.save(plan);
+
+        // NUEVO: NOTIFICAR AL NUTRICIONISTA
+        notifyNutritionistAboutPatientAction(plan, action, feedback, patient);
+
+        return savedPlan;
+    }
+
+
+    private void notifyNutritionistAboutPatientAction(NutritionPlan plan, PatientAction action,
+                                                      String feedback, User patient) {
+        try {
+            UserId nutritionistId = plan.getNutritionistId();
+            String patientName = patient.getFullName(); // Ajusta según tu clase User
+            String actionType = action == PatientAction.ACCEPT ? "ACCEPTED" : "REJECTED";
+
+            PatientPlanActionEvent event = PatientPlanActionEvent.of(
+                    plan.getPatientId(),
+                    nutritionistId,
+                    plan.getPlanId().getValue(),
+                    patientName,
+                    actionType,
+                    feedback
+            );
+
+            nutritionistNotificationService.handlePatientPlanAction(event);
+
+            LoggerFactory.getLogger(NutritionPlanService.class)
+                    .info("Notificación enviada al nutricionista {} sobre acción del paciente {}",
+                            nutritionistId.getValue(), actionType);
+
+        } catch (Exception e) {
+
+            LoggerFactory.getLogger(NutritionPlanService.class)
+                    .error("Error enviando notificación al nutricionista: {}", e.getMessage(), e);
+        }
     }
 
     public List<NutritionPlan> getRejectedByPatientPlans(UserId nutritionistId) {

@@ -39,12 +39,18 @@ public class NotificationController {
             @Valid @RequestBody DeviceTokenRequest request,
             Authentication authentication) {
 
+        log.info("=== REGISTER DEVICE TOKEN CONTROLLER ===");
+        log.info("Request platform: {}", request.getPlatform());
+        log.info("Request token length: {}", request.getDeviceToken().length());
+
         try {
             UserId userId = getCurrentUserId(authentication);
             Platform platform = Platform.valueOf(request.getPlatform().toUpperCase());
             DeviceToken deviceToken = DeviceToken.of(request.getDeviceToken(), platform);
 
+            log.info("Calling notificationDomainService.registerDeviceToken");
             notificationDomainService.registerDeviceToken(userId, deviceToken);
+            log.info("✅ Domain service call completed");
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success("Device token registered successfully"));

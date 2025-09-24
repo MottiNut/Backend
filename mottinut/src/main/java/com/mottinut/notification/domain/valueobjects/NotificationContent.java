@@ -40,4 +40,57 @@ public class NotificationContent {
                 .data(data)
                 .build();
     }
+
+    public static NotificationContent planAcceptedByPatient(Long planId, String patientName, UserId nutritionistId) {
+        return NotificationContent.builder()
+                .title("✅ Plan Aceptado por Paciente")
+                .body(patientName + " ha aceptado el plan nutricional")
+                .data(Map.of(
+                        "type", "PLAN_ACCEPTED_BY_PATIENT",
+                        "planId", planId.toString(),
+                        "patientName", patientName,
+                        "nutritionistId", nutritionistId.getValue().toString()
+                ))
+                .build();
+    }
+
+    public static NotificationContent planRejectedByPatient(Long planId, String patientName, UserId nutritionistId, String reason) {
+        Map<String, String> data = new HashMap<>();
+        data.put("type", "PLAN_REJECTED_BY_PATIENT");
+        data.put("planId", planId.toString());
+        data.put("patientName", patientName);
+        data.put("nutritionistId", nutritionistId.getValue().toString());
+        data.put("reason", Optional.ofNullable(reason).orElse("Sin motivo especificado"));
+
+        return NotificationContent.builder()
+                .title("❌ Plan Rechazado por Paciente")
+                .body(patientName + " ha rechazado el plan nutricional")
+                .data(data)
+                .build();
+    }
+
+    public static NotificationContent planModifiedByPatient(Long planId, String patientName, UserId nutritionistId) {
+        return NotificationContent.builder()
+                .title("✏️ Plan Modificado por Paciente")
+                .body(patientName + " ha solicitado modificaciones al plan")
+                .data(Map.of(
+                        "type", "PLAN_MODIFIED_BY_PATIENT",
+                        "planId", planId.toString(),
+                        "patientName", patientName,
+                        "nutritionistId", nutritionistId.getValue().toString()
+                ))
+                .build();
+    }
+
+    public static NotificationContent newPatientAssigned(String patientName, UserId nutritionistId) {
+        return NotificationContent.builder()
+                .title("👋 Nuevo Paciente Asignado")
+                .body("Tienes un nuevo paciente: " + patientName)
+                .data(Map.of(
+                        "type", "NEW_PATIENT_ASSIGNED",
+                        "patientName", patientName,
+                        "nutritionistId", nutritionistId.getValue().toString()
+                ))
+                .build();
+    }
 }

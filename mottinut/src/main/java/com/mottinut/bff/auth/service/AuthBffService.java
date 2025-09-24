@@ -5,10 +5,9 @@ import com.mottinut.auth.domain.emalServices.requestCode.ResendCodeRequest;
 import com.mottinut.auth.domain.emalServices.requestCode.VerifyCodeRequest;
 import com.mottinut.auth.domain.emalServices.responsiveStatus.VerificationStatusResponse;
 import com.mottinut.auth.domain.emalServices.services.VerificationService;
-import com.mottinut.auth.domain.entities.Nutritionist;
-import com.mottinut.auth.domain.entities.Patient;
-import com.mottinut.auth.domain.entities.User;
+import com.mottinut.auth.domain.entities.*;
 import com.mottinut.auth.domain.services.AuthService;
+import com.mottinut.auth.domain.services.ShareProfileService;
 import com.mottinut.auth.domain.services.UserService;
 import com.mottinut.auth.domain.valueobjects.Token;
 import com.mottinut.bff.auth.dto.request.*;
@@ -30,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -40,12 +40,17 @@ public class AuthBffService {
     private final VerificationService verificationService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final ShareProfileService shareProfileService;
+
     public AuthBffService(AuthService authService, UserService userService,
-                          VerificationService verificationService, JwtTokenProvider jwtTokenProvider) {
+                          VerificationService verificationService,
+                          JwtTokenProvider jwtTokenProvider,
+                          ShareProfileService shareProfileService) {
         this.authService = authService;
         this.userService = userService;
         this.verificationService = verificationService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.shareProfileService = shareProfileService;
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -376,4 +381,45 @@ public class AuthBffService {
             throw new com.mottinut.shared.domain.exceptions.ValidationException("Error al procesar la imagen");
         }
     }
+
+    /*Share Profile*/
+    public Map<String, String> generateShareLink(User user, String baseUrl) {
+        ShareCode.UserType userType = user.getRole().isPatient() ?
+                ShareCode.UserType.PATIENT : ShareCode.UserType.NUTRITIONIST;
+
+        return shareProfileService.generateShareLink(user.getUserId(), userType, baseUrl);
+    }
+
+
+    public Map<String, Object> resolveShareCode(String shortCode, String ipAddress, String userAgent, String referrer) {
+        return shareProfileService.resolveShortCode(shortCode, ipAddress, userAgent, referrer);
+    }
+
+
+    public Map<String, Object> getPublicPatientProfile(UserId userId) {
+        return shareProfileService.getPublicPatientProfile(userId);
+    }
+
+    public Map<String, Object> getPublicNutritionistProfile(UserId userId) {
+        return shareProfileService.getPublicNutritionistProfile(userId);
+    }
+
+    public ProfilePrivacySettings updatePrivacySettings(UserId userId, boolean isProfilePublic,
+                                                        boolean showContactInfo, boolean showLocation,
+                                                        boolean allowDirectMessages) {
+        return shareProfileService.updatePrivacySettings(userId, isProfilePublic, showContactInfo, showLocation, allowDirectMessages);
+    }
+
+    public ProfilePrivacySettings getPrivacySettings(UserId userId) {
+        return shareProfileService.getPrivacySettings(userId);
+    }
+
+
+    public Map<String, Object> getShareStatistics(User user) {
+        ShareCode.UserType userType = user.getRole().isPatient() ?
+                ShareCode.UserType.PATIENT : ShareCode.UserType.NUTRITIONIST;
+
+        return shareProfileService.getShareStatistics(user.getUserId(), userType);
+    }
+
 }

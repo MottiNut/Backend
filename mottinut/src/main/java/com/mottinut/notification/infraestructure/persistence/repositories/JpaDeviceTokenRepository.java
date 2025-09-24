@@ -15,10 +15,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 @Repository
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class JpaDeviceTokenRepository implements DeviceTokenRepository {
 
     private final UserDeviceTokenJpaRepository jpaRepository;
@@ -42,37 +44,79 @@ public class JpaDeviceTokenRepository implements DeviceTokenRepository {
 
     @Override
     public void save(UserId userId, DeviceToken deviceToken) {
-        // Buscar si ya existe un token con ese valor (independientemente del usuario)
-        Optional<UserDeviceTokenEntity> existingByToken = jpaRepository.findByDeviceToken(deviceToken.getValue());
+        log.info("=== SAVE DEVICE TOKEN ===");
+        log.info("User ID: {}", userId.getValue());
+        log.info("Device Token: {}...", deviceToken.getValue().substring(0, 10));
+        log.info("Platform: {}", deviceToken.getPlatform());
 
-        if (existingByToken.isPresent()) {
-            // Si existe, actualizar ese registro con el nuevo usuario
-            UserDeviceTokenEntity entity = existingByToken.get();
-            entity.setUserId(userId.getValue());
-            entity.setIsActive(true);
-            entity.setUpdatedAt(LocalDateTime.now());
-            entity.setLastUsedAt(LocalDateTime.now());
-            entity.setPlatform(deviceToken.getPlatform());
-            jpaRepository.save(entity);
-        } else {
-            // Si no existe, buscar si el usuario ya tiene un token activo
-            Optional<UserDeviceToken> existing = jpaRepository.findByUserIdAndIsActiveTrue(userId.getValue())
-                    .map(mapper::toDomainObject);
+        try {
+            // Buscar si ya existe un token con ese valor (independientemente del usuario)
+            Optional<UserDeviceTokenEntity> existingByToken = jpaRepository.findByDeviceToken(deviceToken.getValue());
 
-            if (existing.isPresent()) {
-                // Actualizar el token existente del usuario
-                UserDeviceToken updated = existing.get().updateToken(deviceToken).markAsUsed();
-                jpaRepository.save(mapper.toEntity(updated));
+            log.info("Token existente por valor: {}", existingByToken.isPresent());
+
+            if (existingByToken.isPresent()) {
+                log.info("Actualizando token existente");
+                // Si existe, actualizar ese registro con el nuevo usuario
+                UserDeviceTokenEntity entity = existingByToken.get();
+                entity.setUserId(userId.getValue());
+                entity.setIsActive(true);
+                entity.setUpdatedAt(LocalDateTime.now());
+                entity.setLastUsedAt(LocalDateTime.now());
+                entity.setPlatform(deviceToken.getPlatform());
+
+                UserDeviceTokenEntity saved = jpaRepository.save(entity);
+                log.info("✅ Token actualizado con ID: {}", saved.getId());
+
             } else {
-                // Crear nuevo token
-                UserDeviceToken newToken = UserDeviceToken.builder()
-                        .userId(userId)
-                        .deviceToken(deviceToken)
-                        .platform(deviceToken.getPlatform())
-                        .isActive(true)
-                        .build();
-                jpaRepository.save(mapper.toEntity(newToken));
+                // Si no existe, buscar si el usuario ya tiene un token activo
+                Optional<UserDeviceTokenEntity> existingByUser = jpaRepository.findByUserIdAndIsActiveTrue(userId.getValue());
+
+                log.info("Token existente por usuario: {}", existingByUser.isPresent());
+
+                if (existingByUser.isPresent()) {
+                    log.info("Actualizando token del usuario");
+                    // Actualizar el token existente del usuario
+                    UserDeviceTokenEntity entity = existingByUser.get();
+                    entity.setDeviceToken(deviceToken.getValue());
+                    entity.setPlatform(deviceToken.getPlatform());
+                    entity.setUpdatedAt(LocalDateTime.now());
+                    entity.setLastUsedAt(LocalDateTime.now());
+
+                    UserDeviceTokenEntity saved = jpaRepository.save(entity);
+                    log.info("✅ Token de usuario actualizado con ID: {}", saved.getId());
+
+                } else {
+                    log.info("Creando nuevo token");
+                    // Crear nuevo token directamente como entity
+                    UserDeviceTokenEntity newEntity = new UserDeviceTokenEntity();
+                    newEntity.setUserId(userId.getValue());
+                    newEntity.setDeviceToken(deviceToken.getValue());
+                    newEntity.setPlatform(deviceToken.getPlatform());
+                    newEntity.setIsActive(true);
+                    newEntity.setCreatedAt(LocalDateTime.now());
+                    newEntity.setUpdatedAt(LocalDateTime.now());
+                    newEntity.setLastUsedAt(LocalDateTime.now());
+
+                    UserDeviceTokenEntity saved = jpaRepository.save(newEntity);
+                    log.info("✅ Nuevo token creado con ID: {}", saved.getId());
+                }
             }
+
+            // Verificación final
+            boolean exists = jpaRepository.existsByUserIdAndIsActiveTrue(userId.getValue());
+            log.info("🔍 Verificación final - Token existe: {}", exists);
+
+            if (!exists) {
+                log.error("❌ CRITICAL: Token no existe después de save!");
+                throw new RuntimeException("Token not persisted correctly");
+            } else {
+                log.info("✅ SUCCESS: Token confirmado en BD");
+            }
+
+        } catch (Exception e) {
+            log.error("❌ Error completo en save: ", e);
+            throw e;
         }
     }
 

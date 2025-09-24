@@ -46,7 +46,7 @@ public class UserVerification {
     @Column(name = "verified_at")
     private LocalDateTime verifiedAt;
 
-    // Constructor personalizado (mantén el que ya tienes)
+
     public UserVerification(UserId userId, VerificationCode code, VerificationType type,
                             String contact, int expirationMinutes) {
         this.userId = userId;
